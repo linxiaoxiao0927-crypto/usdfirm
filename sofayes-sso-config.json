@@ -1,0 +1,31 @@
+{
+  "projectId": "asdcoin",
+  "adminSlug": "asdcoin-admin",
+  "projectName": "ASDCoin 生态权益与治理通证",
+  "domain": "asdcoin.com",
+  "ssoProvider": "SofaYes Open OIDC 2.0",
+  "clientId": "sfy_client_asdcoin_official",
+  "authorizeEndpoint": "http://localhost:3001/api/oauth/sofayes/authorize",
+  "tokenEndpoint": "http://localhost:3001/api/oauth/sofayes/token",
+  "userInfoEndpoint": "http://localhost:3001/api/oauth/sofayes/userinfo",
+  "sdkScriptUrl": "http://localhost:3001/api/oauth/sofayes/sdk.js",
+  "adminConsoleUrl": "http://localhost:3001/?admin=asdcoin-admin&view=matrix_admin_union",
+  "supportedLoginChannels": [
+    "sofayes",
+    "google",
+    "apple",
+    "x",
+    "facebook",
+    "instagram",
+    "tiktok",
+    "wechat",
+    "douyin"
+  ],
+  "unionFeatures": [
+    "Basic Account CRM",
+    "9-Provider OAuth & SofaYes Login Switch",
+    "Skin & Theme Color Palette Controller",
+    "Admin Analytics & Telemetry",
+    "RBAC & Security Audit"
+  ]
+}

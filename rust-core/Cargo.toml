@@ -1,0 +1,9 @@
+[package]
+name = "asdcoin-rust-core"
+version = "0.1.0"
+edition = "2021"
+description = "ASDCoin u128 Double-Entry State Channel & SHA-256 Merkle Proof-of-Reserves Core"
+
+[lib]
+name = "asdcoin_rust_core"
+path = "src/lib.rs"

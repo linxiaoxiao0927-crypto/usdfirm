@@ -1,0 +1,10 @@
+[package]
+name = "asdcoin-escrow-program"
+version = "0.1.0"
+edition = "2021"
+description = "ASDCoin Solana/Anchor Smart Contract for ASD-S Stablecoin & 4-Flow Escrow Split"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "asdcoin_escrow_program"
+path = "src/lib.rs"

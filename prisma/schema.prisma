@@ -1,0 +1,174 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccountType {
+  ASSET_RESERVE
+  USER_WALLET
+  ESCROW_VAULT
+  SKILL_GAS_POOL
+  TREASURY_BURN
+}
+
+enum EscrowStatus {
+  PENDING_4FLOW
+  LOCKED_IN_TRANSIT
+  SETTLED_SPLIT
+  DISPUTED_FROZEN
+  REFUNDED
+}
+
+enum ReserveAssetType {
+  US_TREASURY_BILL
+  FDIC_CASH_DEPOSIT
+  OVERNIGHT_REPO
+  FED_RESERVE_CASH
+}
+
+enum MintBurnOrderType {
+  MINT
+  BURN
+}
+
+enum OrderExecutionStatus {
+  PENDING_COMPLIANCE
+  QUEUED_TIMELOCK
+  EXECUTED
+  REJECTED
+  CANCELLED
+}
+
+enum TimelockProposalStatus {
+  QUEUED
+  EXECUTED
+  CANCELLED
+  EXPIRED
+}
+
+model LedgerAccount {
+  id           String        @id @default(cuid())
+  ownerSite    String
+  ownerEntity  String
+  accountType  AccountType
+  asdStableBal Decimal       @default(0)
+  asdGasBal    Decimal       @default(0)
+  version      Int           @default(1)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  debits       LedgerEntry[] @relation("DebitAcc")
+  credits      LedgerEntry[] @relation("CreditAcc")
+
+  @@unique([ownerSite, ownerEntity, accountType])
+}
+
+model LedgerEntry {
+  id             String        @id @default(cuid())
+  idempotencyKey String        @unique
+  txHash         String
+  debitAccId     String
+  creditAccId    String
+  amount         Decimal
+  tokenType      String
+  skillCode      String?
+  memo           String?
+  createdAt      DateTime      @default(now())
+
+  debitAccount   LedgerAccount @relation("DebitAcc", fields: [debitAccId], references: [id])
+  creditAccount  LedgerAccount @relation("CreditAcc", fields: [creditAccId], references: [id])
+
+  @@index([txHash])
+  @@index([debitAccId])
+  @@index([creditAccId])
+}
+
+model FourFlowEscrow {
+  id             String       @id @default(cuid())
+  orderNo        String       @unique
+  sourceSite     String
+  totalAmount    Decimal
+  status         EscrowStatus @default(PENDING_4FLOW)
+  setupyesEntity String?
+  taxyesRouteId  String?
+  xpayesPayment  String?
+  uptoyesWaybill String?
+  splitRulesJson Json
+  settledAt      DateTime?
+  createdAt      DateTime     @default(now())
+}
+
+model UsdfReserveAsset {
+  id            String           @id @default(cuid())
+  cusip         String           @unique
+  name          String
+  assetType     ReserveAssetType
+  custodian     String
+  maturityDate  DateTime?
+  notionalUsd   Decimal
+  marketUsd     Decimal
+  yieldApy      Decimal          @default(0)
+  lastAuditDate DateTime
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+}
+
+model UsdfMintBurnOrder {
+  id             String               @id @default(cuid())
+  orderNo        String               @unique
+  orderType      MintBurnOrderType
+  partnerSite    String
+  requesterPubkey String
+  amountUsd      Decimal
+  feeUsd         Decimal              @default(0)
+  status         OrderExecutionStatus @default(PENDING_COMPLIANCE)
+  txHash         String?
+  xpayesRef      String?
+  itisdealRef    String?
+  timelockEta    DateTime?
+  executedAt     DateTime?
+  createdAt      DateTime             @default(now())
+
+  @@index([partnerSite])
+  @@index([status])
+}
+
+model UsdfTimelockProposal {
+  id           String                 @id @default(cuid())
+  proposalId   String                 @unique
+  targetAction String
+  proposer     String
+  delaySeconds Int
+  eta          DateTime
+  status       TimelockProposalStatus @default(QUEUED)
+  confirmCount Int                    @default(1)
+  signersJson  Json
+  executionTx  String?
+  createdAt    DateTime               @default(now())
+}
+
+model UsdfPoRSnapshot {
+  id             String   @id @default(cuid())
+  roundId        Int      @unique
+  merkleRoot     String
+  totalReserves  Decimal
+  circulatingUsdf Decimal
+  reserveRatio   Decimal
+  auditorFirm    String
+  attestationUrl String
+  snapshotTime   DateTime @default(now())
+}
+
+model UsdfAuditLogEntry {
+  id          String   @id @default(cuid())
+  sequenceNum Int      @unique
+  prevHash    String
+  currHash    String
+  actor       String
+  action      String
+  payloadJson Json
+  timestamp   DateTime @default(now())
+}
