@@ -35,12 +35,17 @@ function buildLocalBundle(): UsdfirmProtocolBundle {
   };
 }
 
+const NO_STORE_HEADERS = { 'Cache-Control': 'no-store, max-age=0' };
+
 export async function GET() {
   if (isVitestOffline()) {
-    return NextResponse.json({
-      success: true,
-      data: buildLocalBundle(),
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: buildLocalBundle(),
+      },
+      { headers: NO_STORE_HEADERS }
+    );
   }
 
   const live = await fetchWorkerState();
@@ -54,12 +59,15 @@ export async function GET() {
           message: live.errorCode,
         },
       },
-      { status: live.status }
+      { status: live.status, headers: NO_STORE_HEADERS }
     );
   }
 
-  return NextResponse.json({
-    success: true,
-    data: live.bundle,
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: live.bundle,
+    },
+    { headers: NO_STORE_HEADERS }
+  );
 }

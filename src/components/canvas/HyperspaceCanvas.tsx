@@ -74,23 +74,48 @@ export function HyperspaceCanvas({
       targetX = e.clientX;
       targetY = e.clientY;
     };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('mousemove', onMove);
+    window.addEventListener('resize', onResize, { passive: true });
+    window.addEventListener('mousemove', onMove, { passive: true });
+
+    const reducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     let animId = 0;
-    const render = () => {
+    let lastFrameTs = 0;
+
+    const render = (now = 0) => {
+      if (typeof document !== 'undefined' && document.hidden && !reducedMotion) {
+        animId = 0;
+        return;
+      }
+
+      const isMobile = width < 768;
+      if (!reducedMotion && isMobile && now > 0 && lastFrameTs > 0 && now - lastFrameTs < 32) {
+        animId = requestAnimationFrame(render);
+        return;
+      }
+
+      const dtMs =
+        lastFrameTs > 0 && now > lastFrameTs
+          ? Math.min(50, Math.max(4, now - lastFrameTs))
+          : 16.67;
+      lastFrameTs = now;
+      const dtScale = reducedMotion ? 0 : dtMs / 16.67;
+
       ctx.fillStyle = '#090A0F';
       ctx.fillRect(0, 0, width, height);
-      mouseX += (targetX - mouseX) * 0.05;
-      mouseY += (targetY - mouseY) * 0.05;
+      mouseX += (targetX - mouseX) * Math.min(1, 0.05 * dtScale);
+      mouseY += (targetY - mouseY) * Math.min(1, 0.05 * dtScale);
 
       const cfg = configRef.current;
-      while (stars.length < cfg.density) {
+      const targetDensity = isMobile ? Math.min(cfg.density, 360) : cfg.density;
+      while (stars.length < targetDensity) {
         stars.push(createStarParticle(true, width, cfg.activeKeys));
       }
-      while (stars.length > cfg.density) stars.pop();
+      while (stars.length > targetDensity) stars.pop();
 
-      const speed = 10 * cfg.speedMultiplier * cfg.pulseBoost;
+      const speed = 10 * cfg.speedMultiplier * cfg.pulseBoost * dtScale;
       const cx = width / 2 + (mouseX - width / 2) * 0.05;
       const cy = height / 2 + (mouseY - height / 2) * 0.05;
 
@@ -124,11 +149,37 @@ export function HyperspaceCanvas({
         ctx.lineTo(xHead, yHead);
         ctx.stroke();
       }
-      animId = requestAnimationFrame(render);
+      if (!reducedMotion) {
+        animId = requestAnimationFrame(render);
+      }
     };
-    animId = requestAnimationFrame(render);
+
+    const onVisibilityChange = () => {
+      if (reducedMotion || typeof document === 'undefined') return;
+      if (document.hidden) {
+        if (animId) {
+          cancelAnimationFrame(animId);
+          animId = 0;
+        }
+      } else if (!animId) {
+        lastFrameTs = 0;
+        animId = requestAnimationFrame(render);
+      }
+    };
+    if (typeof document !== 'undefined') {
+      document.addEventListener('visibilitychange', onVisibilityChange);
+    }
+
+    if (reducedMotion) {
+      render(0);
+    } else {
+      animId = requestAnimationFrame(render);
+    }
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
+      if (typeof document !== 'undefined') {
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      }
       window.removeEventListener('resize', onResize);
       window.removeEventListener('mousemove', onMove);
     };

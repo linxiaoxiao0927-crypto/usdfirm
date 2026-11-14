@@ -128,6 +128,7 @@ export async function POST(request: Request) {
       const workerRes = await fetch(`${USDFIRM_WORKER_URL}/api/bridge/xpayes-settlement`, {
         method: 'POST',
         cache: 'no-store',
+        signal: AbortSignal.timeout(7000),
         headers: {
           'Content-Type': 'application/json',
           'X-SM-Caller': caller,

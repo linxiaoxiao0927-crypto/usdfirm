@@ -126,6 +126,7 @@ export async function POST(request: Request) {
       const workerRes = await fetch(`${USDFIRM_WORKER_URL}/api/mint`, {
         method: 'POST',
         cache: 'no-store',
+        signal: AbortSignal.timeout(7000),
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amountUsdf: parsed.data.amountUsd,

@@ -303,6 +303,7 @@ export async function fetchWorkerState(
     const res = await fetchImpl(`${USDFIRM_WORKER_URL}/api/state`, {
       method: 'GET',
       cache: 'no-store',
+      signal: AbortSignal.timeout(7000),
     });
     const json = (await res.json()) as WorkerSnapshotResponse;
     if (!res.ok || !json.ok) {
@@ -338,6 +339,7 @@ export async function fetchWorkerTrace(
     const res = await fetchImpl(`${USDFIRM_WORKER_URL}/api/trace${query}`, {
       method: 'GET',
       cache: 'no-store',
+      signal: AbortSignal.timeout(7000),
     });
     const json = (await res.json()) as {
       ok?: boolean;
@@ -392,6 +394,7 @@ export async function executeFirewallSelfCheck(
   const res = await fetchImpl(`${USDFIRM_WORKER_URL}/api/bridge/xpayes-settlement`, {
     method: 'POST',
     cache: 'no-store',
+    signal: AbortSignal.timeout(7000),
     headers: {
       'Content-Type': 'application/json',
       'X-SM-Caller': 'usdfirm-firewall-selfcheck',

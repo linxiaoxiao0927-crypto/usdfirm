@@ -4,7 +4,9 @@ import { SegregatedMmBridge } from '@/lib/usdfirm/bridges/segregated-mm-bridge';
 import {
   fetchWorkerState,
   isVitestOffline,
+  USDFIRM_WORKER_URL,
 } from '@/lib/usdfirm/worker-client';
+import { signClearingEnvelopeServer } from '@/lib/usdfirm/clearing-signer';
 
 export const dynamic = 'force-dynamic';
 
@@ -106,35 +108,89 @@ export async function POST(request: Request) {
     }
 
     if (!isVitestOffline()) {
+      const caller = 'itisdeal.com';
+      const now = String(Date.now());
+      const traceId = `trc_ui_mm_${now}`;
+      const idempotencyKey = `ui_mm_${parsed.data.payload.poolId}_${parsed.data.payload.exchangeNonce}_${now}`;
+      const rawBody = JSON.stringify({
+        orderType: parsed.data.payload.orderType,
+        amountUsdf: parsed.data.payload.amountUsdf,
+        poolId: parsed.data.payload.poolId,
+        marketMakerId: parsed.data.payload.marketMakerId,
+        exchangeNonce: parsed.data.payload.exchangeNonce,
+        vaultDepositRef: parsed.data.payload.vaultDepositRef,
+      });
+
       const serverSecret = process.env.CLEARING_HMAC_SECRET;
-      if (parsed.data.tamperTest || !serverSecret) {
+      const sig =
+        !parsed.data.tamperTest && serverSecret
+          ? signClearingEnvelopeServer({
+              caller,
+              traceId,
+              timestamp: now,
+              idempotencyKey,
+              rawBody,
+              secret: serverSecret,
+            })
+          : parsed.data.signature;
+
+      const workerRes = await fetch(
+        `${USDFIRM_WORKER_URL}/api/bridge/itisdeal-liquidity`,
+        {
+          method: 'POST',
+          cache: 'no-store',
+          signal: AbortSignal.timeout(7000),
+          headers: {
+            'Content-Type': 'application/json',
+            'X-SM-Caller': caller,
+            'X-SM-Trace-Id': traceId,
+            'X-SM-Timestamp': now,
+            'X-SM-Idempotency-Key': idempotencyKey,
+            'X-SM-Signature': sig,
+          },
+          body: rawBody,
+        }
+      );
+
+      const workerJson = (await workerRes.json().catch(() => ({}))) as {
+        ok?: boolean;
+        errorCode?: string;
+        orderType?: string;
+        amountUsdf?: number;
+        allocatedUsdf?: number;
+        bufferRemaining?: number;
+        maxCapUsdf?: number;
+        txHash?: string;
+        traceId?: string;
+      };
+
+      if (!workerRes.ok || !workerJson.ok) {
+        const errCode = workerJson.errorCode || 'ERR_INVALID_HMAC_SIGNATURE';
         return NextResponse.json(
           {
             success: false,
             error: {
-              code: 'ERR_INVALID_HMAC_SIGNATURE',
-              errorCode: 'ERR_INVALID_HMAC_SIGNATURE',
-              message: 'ERR_INVALID_HMAC_SIGNATURE',
+              code: errCode,
+              errorCode: errCode,
+              message: errCode,
             },
           },
-          { status: 401 }
+          { status: workerRes.status || 401 }
         );
       }
-
-      const bridge = SegregatedMmBridge.getInstance();
-      const validSig = bridge.generateSignatureForTesting(parsed.data.payload);
-      const localRes = bridge.executeLiquidityOperation(parsed.data.payload, validSig);
 
       return NextResponse.json(
         {
           success: true,
           data: {
             status: 'COMMITTED',
-            allocatedUsdf: localRes.bufferRemaining,
-            bufferRemaining: 20_000_000 - localRes.bufferRemaining,
-            maxCapUsdf: 20_000_000,
-            txHash: localRes.txHash,
-            traceId: `trc_mm_${Date.now()}`,
+            orderType: workerJson.orderType ?? parsed.data.payload.orderType,
+            amountUsdf: workerJson.amountUsdf ?? parsed.data.payload.amountUsdf,
+            allocatedUsdf: workerJson.allocatedUsdf ?? 0,
+            bufferRemaining: workerJson.bufferRemaining ?? 0,
+            maxCapUsdf: workerJson.maxCapUsdf ?? 20_000_000,
+            txHash: workerJson.txHash ?? '',
+            traceId: workerJson.traceId ?? traceId,
           },
         },
         { status: 200 }

@@ -135,6 +135,7 @@ export function UsdfirmProtocolHub({
         setWsState('LIVE');
         if (heartbeatTimer) clearInterval(heartbeatTimer);
         heartbeatTimer = setInterval(() => {
+          if (typeof document !== 'undefined' && document.hidden) return;
           if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({ type: 'ping', clientTs: Date.now() }));
           }
