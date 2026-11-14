@@ -5,7 +5,7 @@ import { UsdfAuditTrail } from './audit-trail';
 export class UsdfReserveEngine {
   private static instance: UsdfReserveEngine;
   private reserves: UsdfReserveAssetItem[] = [];
-  private circulatingUsdf = 120_000_000; // $120M circulating USDF
+  private circulatingUsdf = 168_500_000; // $168.5M circulating USDF matching DO baseline
 
   private constructor() {
     this.seedInstitutionalReserves();
@@ -21,47 +21,59 @@ export class UsdfReserveEngine {
   private seedInstitutionalReserves(): void {
     this.reserves = [
       {
-        cusip: '912797HY7',
-        name: 'US Treasury Bill 4-Week (Mat. 2026-11-26)',
+        cusip: 'RSV-TBILL',
+        name: 'US Treasury T-Bills (1-3M)',
+        nameZh: '美国短期国债 (1-3M T-Bills)',
+        nameEn: 'US Treasury T-Bills (1-3M)',
         assetType: 'US_TREASURY_BILL',
         custodian: 'BNY Mellon Institutional Custody',
-        maturityDate: '2026-11-26T16:00:00Z',
-        notionalUsd: 45_000_000,
-        marketUsd: 44_865_000,
-        yieldApy: 4.85,
+        maturityDate: '2026-12-31T16:00:00Z',
+        notionalUsd: 68_500_000,
+        marketUsd: 68_500_000,
+        yieldApy: 5.15,
+        weightPct: 39.48,
         lastAuditDate: new Date().toISOString(),
       },
       {
-        cusip: '912797HZ4',
-        name: 'US Treasury Bill 13-Week (Mat. 2026-12-31)',
+        cusip: '912797HY7',
+        name: 'US Treasury Bill 4-Week (Mat. 2026-11-26)',
+        nameZh: '4 周短期美国国债 (912797HY7)',
+        nameEn: 'US Treasury Bill 4-Week (Mat. 2026-11-26)',
         assetType: 'US_TREASURY_BILL',
         custodian: 'State Street Global Custody',
-        maturityDate: '2026-12-31T16:00:00Z',
+        maturityDate: '2026-11-26T16:00:00Z',
         notionalUsd: 40_000_000,
-        marketUsd: 39_810_000,
+        marketUsd: 40_000_000,
         yieldApy: 4.92,
+        weightPct: 23.05,
         lastAuditDate: new Date().toISOString(),
       },
       {
-        cusip: 'CASH-BNY-FED-01',
-        name: 'Fed Overnight Reverse Repo (RRP) Cash',
+        cusip: 'RSV-CASH',
+        name: 'Custodial Cash & Fed Overnight Repo',
+        nameZh: '银行现金与隔夜逆回购 (Cash & RRP)',
+        nameEn: 'Custodial Cash & Fed Overnight Repo',
         assetType: 'OVERNIGHT_REPO',
-        custodian: 'Federal Reserve Bank of New York',
+        custodian: 'Federal Reserve Bank of New York / JPMorgan',
         maturityDate: null,
-        notionalUsd: 25_000_000,
-        marketUsd: 25_000_000,
+        notionalUsd: 45_000_000,
+        marketUsd: 45_000_000,
         yieldApy: 4.75,
+        weightPct: 25.94,
         lastAuditDate: new Date().toISOString(),
       },
       {
         cusip: 'CASH-FDIC-SWEEP-02',
         name: 'FDIC-Insured Multi-Bank Cash Sweep Account',
+        nameZh: 'FDIC 承保多行现金归集账户',
+        nameEn: 'FDIC-Insured Multi-Bank Cash Sweep Account',
         assetType: 'FDIC_CASH_DEPOSIT',
-        custodian: 'JPMorgan Chase / Citigroup Segregated',
+        custodian: 'Citigroup / BNY Segregated',
         maturityDate: null,
-        notionalUsd: 15_000_000,
-        marketUsd: 15_000_000,
-        yieldApy: 4.50,
+        notionalUsd: 20_000_000,
+        marketUsd: 20_000_000,
+        yieldApy: 4.5,
+        weightPct: 11.53,
         lastAuditDate: new Date().toISOString(),
       },
     ];

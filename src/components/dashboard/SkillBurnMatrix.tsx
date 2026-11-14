@@ -13,6 +13,7 @@ import type {
   SkillCode,
   LedgerSnapshot,
 } from '@/types/ledger';
+import { useUsdfirmLocale, extractErrorCode } from '@/lib/usdfirm/i18n';
 
 interface SkillBurnMatrixProps {
   skills: SkillDefinition[];
@@ -25,20 +26,26 @@ export function SkillBurnMatrix({
   totalBurnedAsdG,
   onSnapshotUpdate,
 }: SkillBurnMatrixProps) {
+  const { copy, resolveError } = useUsdfirmLocale();
+  const t = copy.dashboard.skills;
+
   const [activeCode, setActiveCode] = useState<SkillCode | null>(null);
   const [status, setStatus] = useState<
     'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'
   >('IDLE');
   const [statusMsg, setStatusMsg] = useState('');
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const triggerSkillCall = async (skill: SkillDefinition) => {
     setActiveCode(skill.code);
     setStatus('LOADING');
     setStatusMsg('');
+    setErrorCode(null);
 
     try {
       const res = await fetch('/api/v1/gas', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           callerSite: 'sofayes.com',
@@ -50,16 +57,27 @@ export function SkillBurnMatrix({
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message ?? 'Skill 算力扣费失败');
+        const code = extractErrorCode(json) || 'ERR_INTERNAL_SERVER';
+        setStatus('ERROR');
+        setErrorCode(code);
+        setStatusMsg(resolveError(code, json.error?.message));
+        return;
       }
       onSnapshotUpdate(json.data.snapshot);
       setStatus('SUCCESS');
       setStatusMsg(
-        `调用 [${skill.domain}] 成功：扣减 ${json.data.totalGasConsumed.toLocaleString()} ASD-G（算力节点分润 ${json.data.providerGas.toLocaleString()} / 实时销毁 ${json.data.burnedGas.toLocaleString()}）`
+        t.formatSuccessMsg(
+          skill.domain,
+          json.data.totalGasConsumed,
+          json.data.providerGas,
+          json.data.burnedGas
+        )
       );
-    } catch (err) {
+    } catch {
+      const code = 'ERR_LEDGER_SYNC_FAILED';
       setStatus('ERROR');
-      setStatusMsg(err instanceof Error ? err.message : '调用异常');
+      setErrorCode(code);
+      setStatusMsg(resolveError(code));
     } finally {
       setActiveCode(null);
     }
@@ -71,29 +89,29 @@ export function SkillBurnMatrix({
         <div>
           <div className="flex items-center gap-2">
             <Flame className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white">
-              AI Business Skills 燃料矩阵 (Skill_01 ~ Skill_06)
-            </h2>
+            <h2 className="text-lg font-bold text-white">{t.title}</h2>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
-            所有跨站商业职能调用按 Token / 毫秒颗粒度实时扣减{' '}
-            <span className="text-amber-300 font-mono">ASD-G</span>，自动执行节点分润与通缩销毁
+            {t.subtitlePrefix}{' '}
+            <span className="text-amber-300 font-mono">uUSDF</span>
+            {t.subtitleSuffix}
           </p>
         </div>
         <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono text-amber-300">
-          累计已燃烧: {totalBurnedAsdG.toLocaleString()} ASD-G
+          {t.burnedBadgePrefix} {totalBurnedAsdG.toLocaleString()} uUSDF
         </span>
       </div>
 
       {skills.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
-          当前暂无已注册的 AI 商业技能接口 (Empty State)
+          {t.emptyState}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {skills.map((skill) => {
             const isCalling =
               status === 'LOADING' && activeCode === skill.code;
+            const localizedMeta = t.skillMeta[skill.code];
             return (
               <div
                 key={skill.code}
@@ -109,25 +127,27 @@ export function SkillBurnMatrix({
                     </span>
                   </div>
                   <h3 className="text-sm font-bold text-white">
-                    {skill.name}
+                    {localizedMeta?.name ?? skill.name}
                   </h3>
                   <p className="text-xs text-zinc-400 leading-relaxed">
-                    {skill.description}
+                    {localizedMeta?.description ?? skill.description}
                   </p>
                 </div>
 
                 <div className="space-y-3 pt-2 border-t border-white/10">
                   <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    <span>单价 ({skill.unitLabel})</span>
+                    <span>
+                      {t.unitPricePrefix} ({localizedMeta?.unitLabel ?? skill.unitLabel})
+                    </span>
                     <span className="font-mono text-amber-300 font-semibold">
-                      {skill.gasPerUnit.toLocaleString()} ASD-G
+                      {skill.gasPerUnit.toLocaleString()} uUSDF
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    <span>分润 / 燃烧配比</span>
+                    <span>{t.splitLabel}</span>
                     <span className="font-mono text-emerald-300">
-                      {Math.round(skill.providerRatio * 100)}% 节点 /{' '}
-                      {Math.round(skill.burnRatio * 100)}% 销毁
+                      {Math.round(skill.providerRatio * 100)}% {t.providerLabel} /{' '}
+                      {Math.round(skill.burnRatio * 100)}% {t.burnLabel}
                     </span>
                   </div>
                   <button
@@ -139,12 +159,12 @@ export function SkillBurnMatrix({
                     {isCalling ? (
                       <>
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        流式计费燃烧中...
+                        {t.callingBtn}
                       </>
                     ) : (
                       <>
                         <Cpu className="w-3.5 h-3.5" />
-                        模拟 10 单位编排调用
+                        {t.invokeBtn}
                       </>
                     )}
                   </button>
@@ -156,11 +176,11 @@ export function SkillBurnMatrix({
       )}
 
       {status !== 'IDLE' && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 px-4 py-3 text-xs flex items-center gap-2">
+        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 px-4 py-3 text-xs flex items-center justify-between gap-2">
           {status === 'LOADING' && (
             <span className="text-amber-300 flex items-center gap-1.5">
               <Loader2 className="w-4 h-4 animate-spin" />
-              正在通过 XPayes + ASDCoin 状态通道执行毫秒级算力扣费...
+              {t.loadingMsg}
             </span>
           )}
           {status === 'SUCCESS' && (
@@ -170,10 +190,17 @@ export function SkillBurnMatrix({
             </span>
           )}
           {status === 'ERROR' && (
-            <span className="text-rose-400 flex items-center gap-1.5">
-              <AlertTriangle className="w-4 h-4 shrink-0" />
-              {statusMsg}
-            </span>
+            <>
+              <span className="text-rose-400 flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                {statusMsg}
+              </span>
+              {errorCode && (
+                <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                  {errorCode}
+                </code>
+              )}
+            </>
           )}
         </div>
       )}

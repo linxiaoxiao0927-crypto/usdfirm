@@ -109,7 +109,7 @@ export function executeMintOrRedeem(input: MintOrRedeemInput): {
     (a) => a.accountType === 'ASSET_RESERVE'
   );
   if (!reserveAcc) {
-    throw new Error('LEDGER_FATAL: 核心储备总账账户缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
 
   const wallet = findOrCreateWallet(
@@ -124,7 +124,7 @@ export function executeMintOrRedeem(input: MintOrRedeemInput): {
   );
 
   if (input.action === 'REDEEM' && wallet.asdStableBal < input.amountUsd) {
-    throw new Error('INSUFFICIENT_ASD_BALANCE: 账户可用 ASD-S 余额不足以赎回');
+    throw new Error('ERR_INSUFFICIENT_USDF_BALANCE');
   }
 
   const delta = input.action === 'MINT' ? input.amountUsd : -input.amountUsd;
@@ -155,9 +155,9 @@ export function executeMintOrRedeem(input: MintOrRedeemInput): {
     debitAccId,
     creditAccId,
     amount: input.amountUsd,
-    tokenType: 'ASD_S',
+    tokenType: 'USDF',
     skillCode: null,
-    memo: `${input.action === 'MINT' ? '1:1 合规铸造' : '1:1 赎回销毁'} (${input.channel})`,
+    memo: `${input.action === 'MINT' ? '1:1 USDF Mint' : '1:1 USDF Redeem'} (${input.channel})`,
     category: 'FINTECH_RESERVE',
     createdAt: new Date().toISOString(),
   };
@@ -179,7 +179,7 @@ export function executeSkillGasBurn(input: SkillGasBurnInput): {
 
   const skill = SHINEMIGHT_SKILLS.find((s) => s.code === input.skillCode);
   if (!skill) {
-    throw new Error(`SKILL_NOT_FOUND: 未知商业技能 ${input.skillCode}`);
+    throw new Error(`ERR_SKILL_NOT_FOUND: ${input.skillCode}`);
   }
 
   const caller = findOrCreateWallet(
@@ -194,12 +194,12 @@ export function executeSkillGasBurn(input: SkillGasBurnInput): {
     (a) => a.accountType === 'TREASURY_BURN'
   );
   if (!skillsPool || !burnVault) {
-    throw new Error('LEDGER_FATAL: Skill 清算池或燃烧国库缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
 
   const totalGasConsumed = Math.round(skill.gasPerUnit * input.units);
   if (caller.asdGasBal < totalGasConsumed) {
-    throw new Error('INSUFFICIENT_GAS_BALANCE: 账户 ASD-G 算力燃料不足');
+    throw new Error('ERR_INSUFFICIENT_UUSDF_BALANCE');
   }
 
   const burnedGas = Math.round(totalGasConsumed * skill.burnRatio);
@@ -224,9 +224,9 @@ export function executeSkillGasBurn(input: SkillGasBurnInput): {
     debitAccId: caller.id,
     creditAccId: burnVault.id,
     amount: totalGasConsumed,
-    tokenType: 'ASD_G',
+    tokenType: 'UUSDF',
     skillCode: skill.code,
-    memo: `[${skill.domain}] 调用 ${input.units} ${skill.unitLabel} (燃烧 ${burnedGas} ASD-G)`,
+    memo: `[${skill.domain}] ${input.units} ${skill.unitLabel} (-${burnedGas} uUSDF burned)`,
     category: skill.category,
     createdAt: new Date().toISOString(),
   };

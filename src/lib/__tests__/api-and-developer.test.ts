@@ -10,7 +10,7 @@ import {
   POST as postSignPayload,
 } from '@/app/api/v1/developer/route';
 
-describe('ASDCoin End-to-End API Routes & Developer HMAC/Audit Suite', () => {
+describe('USDFirm End-to-End API Routes & Developer HMAC/Audit Suite', () => {
   beforeEach(() => {
     resetLedgerStoreForTesting();
   });
@@ -84,7 +84,7 @@ describe('ASDCoin End-to-End API Routes & Developer HMAC/Audit Suite', () => {
       body: JSON.stringify({
         ownerSite: 'sofayes.com',
         ownerEntity: 'ENT-SOFA-CORE',
-        direction: 'ASD_S_TO_G',
+        direction: 'USDF_TO_UUSDF',
         amount: 50,
         idempotencyKey: 'idem-e2e-swap-01',
       }),

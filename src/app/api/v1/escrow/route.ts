@@ -13,10 +13,12 @@ import type {
   LedgerSnapshot,
 } from '@/types/ledger';
 
+export const dynamic = 'force-dynamic';
+
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
-  error?: { code: string; message: string; details?: unknown };
+  error?: { code: string; errorCode?: string; message: string; details?: unknown };
 };
 
 export async function POST(request: Request) {
@@ -31,7 +33,8 @@ export async function POST(request: Request) {
             success: false,
             error: {
               code: 'VALIDATION_ERROR',
-              message: '创建四流合一托管单参数校验失败',
+              errorCode: 'ERR_VALIDATION_FAILED',
+              message: 'ERR_VALIDATION_FAILED',
               details: parsedCreate.error.flatten().fieldErrors,
             },
           },
@@ -65,7 +68,8 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: '四流合一清算凭证校验失败',
+            errorCode: 'ERR_VALIDATION_FAILED',
+            message: 'ERR_VALIDATION_FAILED',
             details: parsedSettle.error.flatten().fieldErrors,
           },
         },
@@ -83,18 +87,26 @@ export async function POST(request: Request) {
     >({ success: true, data: result }, { status: 200 });
   } catch (err) {
     console.error('[API_ERROR]', err);
-    const message =
-      err instanceof Error ? err.message : '四流合一分润引擎异常';
-    const isBusinessErr =
-      message.includes('IDEMPOTENCY_CONFLICT') ||
-      message.includes('ESCROW_') ||
-      message.includes('INSUFFICIENT_');
+    const rawMsg = err instanceof Error ? err.message : '';
+    const errCode = rawMsg.includes('IDEMPOTENCY_CONFLICT')
+      ? 'ERR_IDEMPOTENCY_CONFLICT'
+      : rawMsg.includes('ESCROW_DUPLICATE')
+        ? 'ERR_ESCROW_DUPLICATE'
+        : rawMsg.includes('ESCROW_NOT_FOUND')
+          ? 'ERR_ESCROW_NOT_FOUND'
+          : rawMsg.includes('ESCROW_ALREADY_SETTLED')
+            ? 'ERR_ESCROW_ALREADY_SETTLED'
+            : rawMsg.includes('INSUFFICIENT_')
+              ? 'ERR_INSUFFICIENT_USDF_BALANCE'
+              : 'ERR_INTERNAL_SERVER';
+    const isBusinessErr = errCode !== 'ERR_INTERNAL_SERVER';
     return NextResponse.json<ApiResponse<never>>(
       {
         success: false,
         error: {
           code: isBusinessErr ? 'ESCROW_REJECTED' : 'INTERNAL_ERROR',
-          message,
+          errorCode: errCode,
+          message: errCode,
         },
       },
       { status: isBusinessErr ? 422 : 500 }

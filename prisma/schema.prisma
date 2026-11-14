@@ -127,7 +127,7 @@ model UsdfMintBurnOrder {
   status         OrderExecutionStatus @default(PENDING_COMPLIANCE)
   txHash         String?
   xpayesRef      String?
-  itisdealRef    String?
+  segregatedMmRef String?
   timelockEta    DateTime?
   executedAt     DateTime?
   createdAt      DateTime             @default(now())

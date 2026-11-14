@@ -5,7 +5,7 @@ import { POST as postBurn } from '@/app/api/v1/usdfirm/burn/route';
 import { GET as getMultiSig, POST as postMultiSig } from '@/app/api/v1/usdfirm/multisig/route';
 import { GET as getRisk, POST as postRisk } from '@/app/api/v1/usdfirm/risk/route';
 import { GET as getXPayes, POST as postXPayes } from '@/app/api/v1/usdfirm/bridge/xpayes/route';
-import { GET as getItisDeal, POST as postItisDeal } from '@/app/api/v1/usdfirm/bridge/itisdeal/route';
+import { GET as getSegregatedMm, POST as postSegregatedMm } from '@/app/api/v1/usdfirm/bridge/segregated-mm/route';
 
 describe('USDFirm REST API Route Handlers', () => {
   it('GET /api/v1/usdfirm/por returns real-time PoR attestation, reserves, and telemetry', async () => {
@@ -85,7 +85,7 @@ describe('USDFirm REST API Route Handlers', () => {
     expect(propJson.data.confirmCount).toBe(1);
   });
 
-  it('GET & POST /api/v1/usdfirm/bridge/xpayes and /itisdeal verify HMAC-SHA256', async () => {
+  it('GET & POST /api/v1/usdfirm/bridge/xpayes and /segregated-mm verify HMAC-SHA256', async () => {
     const xSampleRes = await getXPayes();
     const xSampleJson = await xSampleRes.json();
     const { samplePayload, sampleSignature } = xSampleJson.data;
@@ -100,20 +100,20 @@ describe('USDFirm REST API Route Handlers', () => {
     expect(xPostRes.status).toBe(200);
     expect(xPostJson.data.status).toBe('SETTLED');
 
-    const iSampleRes = await getItisDeal();
-    const iSampleJson = await iSampleRes.json();
-    const iPostRes = await postItisDeal(
-      new Request('http://localhost/api/v1/usdfirm/bridge/itisdeal', {
+    const mmSampleRes = await getSegregatedMm();
+    const mmSampleJson = await mmSampleRes.json();
+    const mmPostRes = await postSegregatedMm(
+      new Request('http://localhost/api/v1/usdfirm/bridge/segregated-mm', {
         method: 'POST',
         body: JSON.stringify({
-          payload: iSampleJson.data.samplePayload,
-          signature: iSampleJson.data.sampleSignature,
+          payload: mmSampleJson.data.samplePayload,
+          signature: mmSampleJson.data.sampleSignature,
         }),
       })
     );
-    const iPostJson = await iPostRes.json();
-    expect(iPostRes.status).toBe(200);
-    expect(iPostJson.data.status).toBe('COMMITTED');
+    const mmPostJson = await mmPostRes.json();
+    expect(mmPostRes.status).toBe(200);
+    expect(mmPostJson.data.status).toBe('COMMITTED');
   });
 
   it('GET & POST /api/v1/usdfirm/risk manage circuit breaker and audit trail', async () => {

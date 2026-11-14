@@ -10,7 +10,7 @@ import {
   getChainRollupStatus,
 } from '@/lib/crypto-chain-engine';
 
-describe('ASDCoin Real SHA-256 Merkle PoR & Rust Chain Bridge', () => {
+describe('USDFirm Real SHA-256 Merkle PoR & Rust Chain Bridge', () => {
   beforeEach(() => {
     resetLedgerStoreForTesting();
   });

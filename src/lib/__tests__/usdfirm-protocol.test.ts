@@ -3,7 +3,7 @@ import { UsdfReserveEngine } from '../usdfirm/reserve-engine';
 import { UsdfMintBurnEngine } from '../usdfirm/mint-burn-engine';
 import { UsdfMultiSigTimelock } from '../usdfirm/multisig-timelock';
 import { XPayesBridge } from '../usdfirm/bridges/xpayes-bridge';
-import { ItisDealBridge } from '../usdfirm/bridges/itisdeal-bridge';
+import { SegregatedMmBridge } from '../usdfirm/bridges/segregated-mm-bridge';
 import { UsdfRiskMonitor } from '../usdfirm/risk-monitor';
 import { UsdfAuditTrail } from '../usdfirm/audit-trail';
 
@@ -36,11 +36,11 @@ describe('USDFirm Protocol Engine Core Suite', () => {
     expect(order1.txHash?.startsWith('0x')).toBe(true);
     expect(reserveEngine.getCirculatingUsdf()).toBe(supplyBefore + 250_000);
 
-    // 2. Large mint >= $1M triggers 24h Timelock Queue
+    // 2. Large mint > $2M triggers 24h Timelock Queue
     const order2 = engine.requestMint({
       partnerSite: 'institutional_direct',
       requesterPubkey: '0x2222222222222222222222222222222222222222',
-      amountUsd: 1_500_000,
+      amountUsd: 2_500_000,
     });
     expect(order2.status).toBe('QUEUED_TIMELOCK');
     expect(order2.timelockEta).toBeDefined();
@@ -112,8 +112,8 @@ describe('USDFirm Protocol Engine Core Suite', () => {
     );
   });
 
-  it('segregates itisdeal.com exchange risk with hard buffer caps', () => {
-    const bridge = ItisDealBridge.getInstance();
+  it('segregates external market-maker risk with hard buffer caps', () => {
+    const bridge = SegregatedMmBridge.getInstance();
     const req = {
       poolId: 'USDF_USDT_AMM_POOL_01',
       orderType: 'MINT_LIQUIDITY' as const,

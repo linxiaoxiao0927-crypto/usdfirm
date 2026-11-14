@@ -3,10 +3,12 @@ import { MintOrRedeemSchema } from '@/lib/schemas/ledger-schemas';
 import { executeMintOrRedeem } from '@/lib/ledger-engine';
 import type { LedgerEntryRecord, LedgerSnapshot } from '@/types/ledger';
 
+export const dynamic = 'force-dynamic';
+
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
-  error?: { code: string; message: string; details?: unknown };
+  error?: { code: string; errorCode?: string; message: string; details?: unknown };
 };
 
 export async function POST(request: Request) {
@@ -19,7 +21,8 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: '铸币/赎回参数校验失败',
+            errorCode: 'ERR_VALIDATION_FAILED',
+            message: 'ERR_VALIDATION_FAILED',
             details: parsed.error.flatten().fieldErrors,
           },
         },
@@ -33,17 +36,20 @@ export async function POST(request: Request) {
     >({ success: true, data: result }, { status: 200 });
   } catch (err) {
     console.error('[API_ERROR]', err);
-    const message =
-      err instanceof Error ? err.message : '铸币/赎回网关异常';
-    const isBusinessErr =
-      message.includes('IDEMPOTENCY_CONFLICT') ||
-      message.includes('INSUFFICIENT_ASD_BALANCE');
+    const rawMsg = err instanceof Error ? err.message : '';
+    const errCode = rawMsg.includes('IDEMPOTENCY_CONFLICT')
+      ? 'ERR_IDEMPOTENCY_CONFLICT'
+      : rawMsg.includes('INSUFFICIENT_')
+        ? 'ERR_INSUFFICIENT_USDF_BALANCE'
+        : 'ERR_INTERNAL_SERVER';
+    const isBusinessErr = errCode !== 'ERR_INTERNAL_SERVER';
     return NextResponse.json<ApiResponse<never>>(
       {
         success: false,
         error: {
           code: isBusinessErr ? 'LEDGER_REJECTED' : 'INTERNAL_ERROR',
-          message,
+          errorCode: errCode,
+          message: errCode,
         },
       },
       { status: isBusinessErr ? 422 : 500 }

@@ -24,7 +24,7 @@ export function executeEscrowCreate(input: EscrowCreateInput): {
   assertIdempotency(state, input.idempotencyKey);
 
   if (state.escrows.some((e) => e.orderNo === input.orderNo)) {
-    throw new Error(`ESCROW_DUPLICATE: 订单号 ${input.orderNo} 已存在`);
+    throw new Error(`ERR_ESCROW_DUPLICATE: ${input.orderNo}`);
   }
 
   const buyer = findOrCreateWallet(
@@ -36,10 +36,10 @@ export function executeEscrowCreate(input: EscrowCreateInput): {
     (a) => a.accountType === 'ESCROW_VAULT'
   );
   if (!escrowVault) {
-    throw new Error('LEDGER_FATAL: 四流合一托管专户缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
   if (buyer.asdStableBal < input.totalAmountAsd) {
-    throw new Error('INSUFFICIENT_ASD_BALANCE: 买方 ASD-S 余额不足以锁定托管');
+    throw new Error('ERR_INSUFFICIENT_USDF_BALANCE');
   }
 
   buyer.asdStableBal -= input.totalAmountAsd;
@@ -73,8 +73,8 @@ export function executeEscrowCreate(input: EscrowCreateInput): {
         percentage: 8,
       },
       {
-        recipientSite: 'asdcoin.com',
-        roleLabel: '协议清算国库留存',
+        recipientSite: 'itiscoin.com',
+        roleLabel: '协议清算财资留存',
         percentage: 2,
       },
     ],
@@ -98,10 +98,10 @@ export function executeEscrowSettlement(input: EscrowSettleInput): {
 
   const escrow = state.escrows.find((e) => e.orderNo === input.orderNo);
   if (!escrow) {
-    throw new Error(`ESCROW_NOT_FOUND: 找不到托管单 ${input.orderNo}`);
+    throw new Error(`ERR_ESCROW_NOT_FOUND: ${input.orderNo}`);
   }
   if (escrow.status === 'SETTLED_SPLIT') {
-    throw new Error(`ESCROW_ALREADY_SETTLED: 订单 ${input.orderNo} 已完成分润`);
+    throw new Error(`ERR_ESCROW_ALREADY_SETTLED: ${input.orderNo}`);
   }
 
   const escrowVault = state.accounts.find(
@@ -111,7 +111,7 @@ export function executeEscrowSettlement(input: EscrowSettleInput): {
     (a) => a.accountType === 'SKILL_GAS_POOL'
   );
   if (!escrowVault || !skillsPool) {
-    throw new Error('LEDGER_FATAL: 托管账户或分润目标池缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
 
   escrow.setupyesEntity = input.setupyesEntity;
@@ -144,7 +144,7 @@ export function executeEscrowSettlement(input: EscrowSettleInput): {
         debitAccId: escrowVault.id,
         creditAccId: skillsPool.id,
         amount: splitAmt,
-        tokenType: 'ASD_S',
+        tokenType: 'USDF',
         skillCode: 'SKILL_03_UPTOYES',
         memo: `[四流合一分润] ${escrow.orderNo} -> ${rule.recipientSite} (${rule.roleLabel} ${rule.percentage}%)`,
         category: 'RETAIL_BRANDS',

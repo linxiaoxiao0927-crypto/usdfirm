@@ -1,4 +1,4 @@
-export type TokenType = 'ASD_S' | 'ASD_G';
+export type TokenType = 'USDF' | 'UUSDF';
 
 export type AccountType =
   | 'ASSET_RESERVE'
@@ -39,8 +39,10 @@ export type MatrixCluster =
 export interface FederationNodeItem {
   domain: string;
   brandName: string;
+  brandNameEn?: string;
   cluster: MatrixCluster;
   roleSummary: string;
+  roleSummaryEn?: string;
   protocolType: 'WEBHOOK_REST' | 'GRPC_STREAM' | 'STATE_CHANNEL';
   status: 'ONLINE' | 'SYNCING' | 'DEGRADED';
   latencyMs: number;

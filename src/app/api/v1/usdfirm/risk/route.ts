@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { UsdfRiskMonitor } from '@/lib/usdfirm/risk-monitor';
 import { UsdfAuditTrail } from '@/lib/usdfirm/audit-trail';
+import { fetchWorkerState, isVitestOffline } from '@/lib/usdfirm/worker-client';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,30 @@ const RiskActionSchema = z.object({
 });
 
 export async function GET() {
+  if (!isVitestOffline()) {
+    const live = await fetchWorkerState();
+    if (!live.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: live.errorCode,
+            errorCode: live.errorCode,
+            message: live.errorCode,
+          },
+        },
+        { status: live.status }
+      );
+    }
+    return NextResponse.json({
+      success: true,
+      data: {
+        telemetry: live.bundle.telemetry,
+        recentLogs: live.bundle.auditLogs,
+      },
+    });
+  }
+
   const riskMonitor = UsdfRiskMonitor.getInstance();
   const telemetry = riskMonitor.getTelemetry();
   const recentLogs = UsdfAuditTrail.getInstance().getRecentLogs(15);
@@ -36,11 +61,26 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Invalid risk action payload',
+            errorCode: 'VALIDATION_ERROR',
+            message: 'VALIDATION_ERROR',
             details: parsed.error.flatten().fieldErrors,
           },
         },
         { status: 400 }
+      );
+    }
+
+    if (!isVitestOffline()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: 'ERR_GOVERNANCE_ONLY',
+            errorCode: 'ERR_GOVERNANCE_ONLY',
+            message: 'ERR_GOVERNANCE_ONLY',
+          },
+        },
+        { status: 403 }
       );
     }
 
@@ -61,9 +101,16 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Risk telemetry operation error';
+    const message = err instanceof Error ? err.message : 'RISK_OP_ERROR';
     return NextResponse.json(
-      { success: false, error: { code: 'RISK_OP_ERROR', message } },
+      {
+        success: false,
+        error: {
+          code: 'RISK_OP_ERROR',
+          errorCode: 'RISK_OP_ERROR',
+          message,
+        },
+      },
       { status: 500 }
     );
   }

@@ -7,12 +7,15 @@ import {
   createStarParticle,
   type StarParticle,
 } from '@/components/canvas/hyperspace-config';
+import { useUsdfirmLocale } from '@/lib/usdfirm/i18n';
 
 export function HyperspaceCanvas({
   pulseBoost = 1,
 }: {
   pulseBoost?: number;
 }) {
+  const { locale, copy } = useUsdfirmLocale();
+  const t = copy.dashboard.canvas;
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [speedMultiplier, setSpeedMultiplier] = useState(6.5);
@@ -148,13 +151,13 @@ export function HyperspaceCanvas({
             <div className="flex items-center justify-between border-b border-white/10 pb-2">
               <span className="font-semibold text-white flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-                超光速清算脉冲引擎
+                {t.title}
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono">60 FPS</span>
+              <span className="text-[10px] text-emerald-400 font-mono">{t.fpsBadge}</span>
             </div>
             <div>
               <div className="flex justify-between mb-1">
-                <span>脉冲速率 (Speed)</span>
+                <span>{t.speedLabel}</span>
                 <span className="text-emerald-400 font-mono">{speedMultiplier.toFixed(1)}x</span>
               </div>
               <input
@@ -169,7 +172,7 @@ export function HyperspaceCanvas({
             </div>
             <div>
               <div className="flex justify-between mb-1">
-                <span>光子拖尾 (Trail)</span>
+                <span>{t.trailLabel}</span>
                 <span className="text-amber-400 font-mono">{trailScale.toFixed(1)}x</span>
               </div>
               <input
@@ -184,7 +187,7 @@ export function HyperspaceCanvas({
             </div>
             <div>
               <div className="flex justify-between mb-1">
-                <span>并发密度 (Density)</span>
+                <span>{t.densityLabel}</span>
                 <span className="text-cyan-400 font-mono">{density}</span>
               </div>
               <input
@@ -212,7 +215,7 @@ export function HyperspaceCanvas({
                     }`}
                   >
                     <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: c.hex }} />
-                    <span className="truncate text-[11px]">{c.label}</span>
+                    <span className="truncate text-[11px]">{locale === 'zh' ? c.label : c.labelEn}</span>
                   </button>
                 );
               })}
@@ -222,11 +225,11 @@ export function HyperspaceCanvas({
         <button
           type="button"
           onClick={() => setPanelOpen((v) => !v)}
-          aria-label="切换超光速脉冲引擎控制面板"
+          aria-label={t.toggleAria}
           className="flex items-center gap-2 rounded-full border border-white/10 bg-zinc-900/80 px-4 py-2.5 text-xs text-zinc-200 backdrop-blur-md hover:border-emerald-500/50 hover:text-white transition shadow-lg"
         >
           <Sliders className="w-3.5 h-3.5 text-emerald-400" />
-          <span>脉冲引擎控制</span>
+          <span>{t.toggleLabel}</span>
         </button>
       </div>
     </>

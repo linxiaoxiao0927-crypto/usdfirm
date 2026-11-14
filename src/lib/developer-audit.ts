@@ -27,14 +27,14 @@ export const SHINEMIGHT_SDK_CREDENTIALS: SiteSdkCredential[] = [
     keyId: 'ak_live_sofa_99812a',
     maskedSecret: 'whsec_sofa_****_e81f',
     scopes: ['MINT_READ', 'SKILL_GAS_BURN', 'FEDERATION_DISPATCH'],
-    webhookUrl: 'https://sofayes.com/api/webhooks/asdcoin',
+    webhookUrl: 'https://sofayes.com/api/webhooks/usdfirm',
   },
   {
     siteDomain: 'xpayes.com',
     keyId: 'ak_live_xpay_77410b',
     maskedSecret: 'whsec_xpay_****_c92a',
     scopes: ['MINT_AUTHORITY', 'REDEEM_SETTLE', 'POR_ATTEST'],
-    webhookUrl: 'https://xpayes.com/api/v1/asdcoin-callback',
+    webhookUrl: 'https://xpayes.com/api/v1/usdfirm-callback',
   },
   {
     siteDomain: 'itiscoin.com',
@@ -69,7 +69,7 @@ export const SHINEMIGHT_SDK_CREDENTIALS: SiteSdkCredential[] = [
     keyId: 'ak_live_dezi_22060g',
     maskedSecret: 'whsec_dezi_****_901a',
     scopes: ['ESCROW_CREATE', 'SUPPLY_CHAIN_SPLIT'],
-    webhookUrl: 'https://dezi.life/api/webhooks/asdcoin',
+    webhookUrl: 'https://dezi.life/api/webhooks/usdfirm',
   },
 ];
 
@@ -106,7 +106,7 @@ export function generateTrialBalanceAudit(
     liabilitiesAndEquityAsdG,
     varianceAsdG,
     isBalanced: varianceAsdS === 0 && varianceAsdG === 0,
-    walPersistenceMode: 'LOCAL_JSON_WAL (.asdcoin-wal.json) + PRISMA_SCHEMA',
+    walPersistenceMode: 'USDFIRM_DO_SQLITE_DURABLE_STATE + PRISMA_SCHEMA',
   };
 }
 
@@ -129,7 +129,7 @@ export function computeSiteHmacSignature(input: {
   const hmacSignature = `sha256=${digest}`;
 
   const curlSnippet = [
-    `curl -X POST https://asdcoin.com/api/v1/federation \\`,
+    `curl -X POST https://usdfirm.com/api/v1/federation \\`,
     `  -H "Content-Type: application/json" \\`,
     `  -d '{"sourceSite":"${input.sourceSite}","targetSite":"${input.targetSite}","eventType":"${input.eventType}","amountAsdS":${input.amountAsdS},"hmacSignature":"${hmacSignature}","payloadSummary":"SDK Signed Clearing","idempotencyKey":"${input.idempotencyKey}"}'`,
   ].join('\n');

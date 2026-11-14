@@ -1,0 +1,10 @@
+{
+  "name": "USDFirm Stablecoin Protocol",
+  "short_name": "USDFirm",
+  "description": "美元稳定币 USDF 铸造/销毁协议、多签时间锁财资池与实时储备证明 (PoR)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#090A0F",
+  "theme_color": "#090A0F",
+  "lang": "zh-CN"
+}

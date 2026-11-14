@@ -141,7 +141,7 @@ export function getChainRollupStatus(
   );
   const topTxHash =
     snapshot.recentEntries[0]?.txHash ??
-    sha256Hex('GENESIS_ASDCOIN_BLOCK_0');
+    sha256Hex('GENESIS_USDFIRM_BLOCK_0');
   const slotHeight = 18_420_000 + snapshot.recentEntries.length;
   const latestBlockHash = sha256Hex(
     `${proof.merkleRoot}|${topTxHash}|${slotHeight}`
@@ -168,7 +168,7 @@ export function getChainRollupStatus(
     latestBlockHash,
     u128InvariantOk: sumStableMicro === reserveStableMicro,
     rustWorkspacePath: 'rust-core/src/lib.rs',
-    solanaProgramPath: 'programs/asdcoin_escrow/src/lib.rs',
+    solanaProgramPath: 'programs/usdfirm_escrow/src/lib.rs',
     executionEngineMode: 'OPENSSL_SHA256_U128_FALLBACK',
   };
 }

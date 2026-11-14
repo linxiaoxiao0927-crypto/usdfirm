@@ -15,7 +15,7 @@ import {
 import { getLedgerSnapshot } from '@/lib/ledger-engine';
 import { computeChainedTxHash } from '@/lib/crypto-chain-engine';
 
-const GAS_PER_ASD_S = 1_000_000;
+const UUSDF_PER_USDF = 1_000_000;
 
 export function executeTokenSwap(input: TokenSwapInput): {
   entry: LedgerEntryRecord;
@@ -29,7 +29,7 @@ export function executeTokenSwap(input: TokenSwapInput): {
     (a) => a.accountType === 'ASSET_RESERVE'
   );
   if (!reserveAcc) {
-    throw new Error('LEDGER_FATAL: 核心储备总账账户缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
 
   const wallet = findOrCreateWallet(
@@ -40,28 +40,26 @@ export function executeTokenSwap(input: TokenSwapInput): {
 
   let convertedAmount = 0;
 
-  if (input.direction === 'ASD_S_TO_G') {
+  if (input.direction === 'USDF_TO_UUSDF') {
     if (wallet.asdStableBal < input.amount) {
-      throw new Error(
-        'INSUFFICIENT_ASD_BALANCE: 可用 ASD-S 余额不足以闪兑 ASD-G'
-      );
+      throw new Error('ERR_INSUFFICIENT_USDF_BALANCE');
     }
-    convertedAmount = Math.round(input.amount * GAS_PER_ASD_S);
+    convertedAmount = Math.round(input.amount * UUSDF_PER_USDF);
     wallet.asdStableBal -= input.amount;
     wallet.asdGasBal += convertedAmount;
     reserveAcc.asdStableBal -= input.amount;
     reserveAcc.asdGasBal += convertedAmount;
-  } else {
+  } else if (input.direction === 'UUSDF_TO_USDF') {
     if (wallet.asdGasBal < input.amount) {
-      throw new Error(
-        'INSUFFICIENT_GAS_BALANCE: 可用 ASD-G 余额不足以反向闪兑 ASD-S'
-      );
+      throw new Error('ERR_INSUFFICIENT_UUSDF_BALANCE');
     }
-    convertedAmount = Number((input.amount / GAS_PER_ASD_S).toFixed(4));
+    convertedAmount = Number((input.amount / UUSDF_PER_USDF).toFixed(4));
     wallet.asdGasBal -= input.amount;
     wallet.asdStableBal += convertedAmount;
     reserveAcc.asdGasBal -= input.amount;
     reserveAcc.asdStableBal += convertedAmount;
+  } else {
+    throw new Error('ERR_VALIDATION_FAILED');
   }
 
   wallet.version += 1;
@@ -81,12 +79,12 @@ export function executeTokenSwap(input: TokenSwapInput): {
     debitAccId: wallet.id,
     creditAccId: reserveAcc.id,
     amount: input.amount,
-    tokenType: input.direction === 'ASD_S_TO_G' ? 'ASD_S' : 'ASD_G',
+    tokenType: input.direction === 'USDF_TO_UUSDF' ? 'USDF' : 'UUSDF',
     skillCode: null,
     memo:
-      input.direction === 'ASD_S_TO_G'
-        ? `[零滑点闪兑] ${input.ownerSite}: ${input.amount.toLocaleString()} ASD-S → ${convertedAmount.toLocaleString()} ASD-G`
-        : `[零滑点闪兑] ${input.ownerSite}: ${input.amount.toLocaleString()} ASD-G → ${convertedAmount.toLocaleString()} ASD-S`,
+      input.direction === 'USDF_TO_UUSDF'
+        ? `[Zero-Slippage Swap] ${input.ownerSite}: ${input.amount.toLocaleString()} USDF → ${convertedAmount.toLocaleString()} uUSDF`
+        : `[Zero-Slippage Swap] ${input.ownerSite}: ${input.amount.toLocaleString()} uUSDF → ${convertedAmount.toLocaleString()} USDF`,
     category: 'FINTECH_RESERVE',
     createdAt: new Date().toISOString(),
   };
@@ -113,9 +111,7 @@ export function executeFederationEvent(input: FederationEventInput): {
     !input.hmacSignature.startsWith('sha256=') ||
     input.hmacSignature.length < 20
   ) {
-    throw new Error(
-      'INVALID_HMAC_SIGNATURE: 跨站联邦报文 HMAC-SHA256 签名验签失败，拒绝入账'
-    );
+    throw new Error('ERR_INVALID_HMAC_SIGNATURE');
   }
 
   const sourceWallet = findOrCreateWallet(
@@ -128,12 +124,10 @@ export function executeFederationEvent(input: FederationEventInput): {
     state.accounts.find((a) => a.accountType === 'SKILL_GAS_POOL');
 
   if (!targetPool) {
-    throw new Error('LEDGER_FATAL: 目标跨站接收清算池缺失');
+    throw new Error('ERR_LEDGER_FATAL');
   }
   if (sourceWallet.asdStableBal < input.amountAsdS) {
-    throw new Error(
-      `INSUFFICIENT_ASD_BALANCE: 发起站点 ${input.sourceSite} 可用 ASD-S 余额不足`
-    );
+    throw new Error('ERR_INSUFFICIENT_USDF_BALANCE');
   }
 
   sourceWallet.asdStableBal -= input.amountAsdS;
@@ -166,7 +160,7 @@ export function executeFederationEvent(input: FederationEventInput): {
     debitAccId: sourceWallet.id,
     creditAccId: targetPool.id,
     amount: input.amountAsdS,
-    tokenType: 'ASD_S',
+    tokenType: 'USDF',
     skillCode:
       input.eventType === 'COMPUTE_LEASE_PAYOUT'
         ? 'SKILL_06_IDLES'

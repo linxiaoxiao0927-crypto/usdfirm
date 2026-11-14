@@ -9,6 +9,8 @@ import {
   type TrialBalanceAuditReport,
 } from '@/lib/developer-audit';
 
+export const dynamic = 'force-dynamic';
+
 const SignPayloadSchema = z.object({
   sourceSite: z.string().min(3).max(64),
   targetSite: z.string().min(3).max(64),
@@ -25,7 +27,7 @@ const SignPayloadSchema = z.object({
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
-  error?: { code: string; message: string; details?: unknown };
+  error?: { code: string; errorCode?: string; message: string; details?: unknown };
 };
 
 export async function GET(_request: Request) {
@@ -52,7 +54,11 @@ export async function GET(_request: Request) {
     return NextResponse.json<ApiResponse<never>>(
       {
         success: false,
-        error: { code: 'INTERNAL_ERROR', message: '试算平衡对账接口异常' },
+        error: {
+          code: 'INTERNAL_ERROR',
+          errorCode: 'ERR_LEDGER_AUDIT_FETCH',
+          message: 'ERR_LEDGER_AUDIT_FETCH',
+        },
       },
       { status: 500 }
     );
@@ -69,7 +75,8 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'HMAC 签名载荷参数校验失败',
+            errorCode: 'ERR_VALIDATION_FAILED',
+            message: 'ERR_VALIDATION_FAILED',
             details: parsed.error.flatten().fieldErrors,
           },
         },
@@ -90,7 +97,11 @@ export async function POST(request: Request) {
     return NextResponse.json<ApiResponse<never>>(
       {
         success: false,
-        error: { code: 'INTERNAL_ERROR', message: 'HMAC 签名生成异常' },
+        error: {
+          code: 'INTERNAL_ERROR',
+          errorCode: 'ERR_HMAC_SIGN_FAILED',
+          message: 'ERR_HMAC_SIGN_FAILED',
+        },
       },
       { status: 500 }
     );

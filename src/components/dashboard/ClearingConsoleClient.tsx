@@ -1,8 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { RefreshCw, AlertOctagon, Inbox, Layers } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { RefreshCw, AlertOctagon, Layers } from 'lucide-react';
 import type { LedgerSnapshot } from '@/types/ledger';
+import type { UsdfirmProtocolBundle } from '@/lib/usdfirm/types';
+import {
+  useUsdfirmLocale,
+  UsdfirmLocaleToggle,
+  extractErrorCode,
+} from '@/lib/usdfirm/i18n';
 import { HyperspaceCanvas } from '@/components/canvas/HyperspaceCanvas';
 import { MetricGlassCard } from '@/components/dashboard/MetricGlassCard';
 import { FederationBusPanel } from '@/components/dashboard/FederationBusPanel';
@@ -28,29 +34,39 @@ export type ModuleTab =
 
 interface ClearingConsoleClientProps {
   initialSnapshot: LedgerSnapshot;
+  initialBundle?: UsdfirmProtocolBundle | null;
+  initialBundleErrorCode?: string | null;
   initialTab?: ModuleTab;
 }
 
-const MODULE_TABS: Array<{ key: ModuleTab; label: string }> = [
-  { key: 'ALL', label: '全景驾驶舱 (All)' },
-  { key: 'USDFIRM', label: 'USDFirm 稳定币发行协议' },
-  { key: 'RUST_CHAIN', label: 'Rust 合约 & Merkle 证明' },
-  { key: 'FEDERATION', label: '29+ 跨站联邦总线' },
-  { key: 'VAULT_SWAP', label: 'PoR 储备 & 双态闪兑' },
-  { key: 'SKILLS', label: 'AI Skill 燃料矩阵' },
-  { key: 'ESCROW', label: '四流合一智能托管' },
-  { key: 'DEVELOPER', label: '开发者 SDK & 对账' },
-  { key: 'LEDGER', label: '复式记账总账审计' },
+const MODULE_TAB_KEYS: ModuleTab[] = [
+  'ALL',
+  'USDFIRM',
+  'RUST_CHAIN',
+  'FEDERATION',
+  'VAULT_SWAP',
+  'SKILLS',
+  'ESCROW',
+  'DEVELOPER',
+  'LEDGER',
 ];
 
 export function ClearingConsoleClient({
   initialSnapshot,
+  initialBundle = null,
+  initialBundleErrorCode = null,
   initialTab = 'ALL',
 }: ClearingConsoleClientProps) {
+  const { copy, resolveError } = useUsdfirmLocale();
+  const c = copy.console;
+
   const [snapshot, setSnapshot] = useState<LedgerSnapshot>(initialSnapshot);
+  const [liveBundle, setLiveBundle] = useState<UsdfirmProtocolBundle | null>(
+    initialBundle ?? null
+  );
   const [activeTab, setActiveTab] = useState<ModuleTab>(initialTab);
-  const [viewState, setViewState] = useState<'SUCCESS' | 'LOADING' | 'EMPTY' | 'ERROR'>('SUCCESS');
-  const [errorBanner, setErrorBanner] = useState<string>('');
+  const [viewState, setViewState] = useState<'SUCCESS' | 'LOADING' | 'ERROR'>('SUCCESS');
+  const [errorCode, setErrorCode] = useState<string>('');
   const [pulseBoost, setPulseBoost] = useState<number>(1);
 
   const handleSnapshotUpdate = (nextSnap: LedgerSnapshot) => {
@@ -60,30 +76,36 @@ export function ClearingConsoleClient({
     setTimeout(() => setPulseBoost(1), 1200);
   };
 
-  const fetchWithMode = async (mode: 'NORMAL' | 'SIMULATE_EMPTY' | 'SIMULATE_ERROR') => {
+  const handleLiveBundleSync = useCallback((bundle: UsdfirmProtocolBundle) => {
+    setLiveBundle(bundle);
+  }, []);
+
+  const syncLedger = async () => {
     setViewState('LOADING');
-    setErrorBanner('');
+    setErrorCode('');
     try {
-      const query =
-        mode === 'SIMULATE_ERROR'
-          ? '?simulateError=true'
-          : mode === 'SIMULATE_EMPTY'
-            ? '?simulateEmpty=true'
-            : '';
-      const res = await fetch(`/api/v1/ledger${query}`);
+      const res = await fetch('/api/v1/ledger', { cache: 'no-store' });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message ?? 'UPSTREAM_LEDGER_ERROR: 清算总账同步失败');
+        const code = extractErrorCode(json) || 'ERR_LEDGER_SYNC_FAILED';
+        setViewState('ERROR');
+        setErrorCode(code);
+        return;
       }
       setSnapshot(json.data);
-      setViewState(mode === 'SIMULATE_EMPTY' ? 'EMPTY' : 'SUCCESS');
-    } catch (err) {
+      setViewState('SUCCESS');
+    } catch {
       setViewState('ERROR');
-      setErrorBanner(
-        err instanceof Error ? err.message : '清结算网关异常：严禁伪造降级，请排查节点连接'
-      );
+      setErrorCode('ERR_LEDGER_SYNC_FAILED');
     }
   };
+
+  const displayCirculating =
+    liveBundle?.attestation.circulatingUsdf ?? snapshot.circulatingAsdS;
+  const displayReservesUsd =
+    liveBundle?.attestation.totalReservesUsd ?? snapshot.totalReserveUsd;
+  const displayReserveRatio =
+    liveBundle?.attestation.reserveRatioPct ?? snapshot.reserveRatioPct;
 
   return (
     <div className="relative min-h-screen text-zinc-100">
@@ -95,56 +117,54 @@ export function ClearingConsoleClient({
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-0.5 text-xs font-mono font-semibold text-emerald-300">
                 <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                ShineMight OS · FinTech Core
+                {c.badge}
               </span>
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-xs font-mono text-amber-300">
-                1 ASD-S = $1.00 USD = 1,000,000 ASD-G
+                {c.pegPill}
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               USDFirm.com{' '}
               <span className="text-zinc-400 font-normal text-lg sm:text-xl">
-                美元稳定币底层发行协议 · PoR 储备金证明与多签财资池
+                {c.pageTitleSub}
               </span>
             </h1>
-            <p className="text-xs text-zinc-400">
-              合规防火墙物理隔离：独立承载 USDF Mint/Burn 与多签储备透明公示，仅向 xpayes.com 输出流动性，与交易所撮合严格隔离
-            </p>
+            <p className="text-xs text-zinc-400">{c.subtitle}</p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <button type="button" onClick={() => fetchWithMode('NORMAL')} className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3 py-2 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 transition">
+            <UsdfirmLocaleToggle />
+            <button
+              type="button"
+              onClick={syncLedger}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/15 px-3 py-2 text-xs font-medium text-emerald-300 hover:bg-emerald-500/25 transition"
+            >
               <RefreshCw className="w-3.5 h-3.5" />
-              同步实时总账
-            </button>
-            <button type="button" onClick={() => fetchWithMode('SIMULATE_EMPTY')} className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-zinc-300 hover:bg-white/10 transition">
-              <Inbox className="w-3.5 h-3.5 text-cyan-400" />
-              空态演练 (Empty)
-            </button>
-            <button type="button" onClick={() => fetchWithMode('SIMULATE_ERROR')} className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-300 hover:bg-rose-500/20 transition">
-              <AlertOctagon className="w-3.5 h-3.5" />
-              故障演练 (Zero-Fake)
+              {c.syncLedger}
             </button>
           </div>
         </header>
 
-        <nav aria-label="核心模块工作区切换" className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-zinc-900/80 p-2 backdrop-blur-md">
+        <nav
+          aria-label={c.viewScope}
+          className="flex flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-zinc-900/80 p-2 backdrop-blur-md"
+        >
           <span className="px-2.5 text-xs text-zinc-400 flex items-center gap-1">
             <Layers className="w-3.5 h-3.5 text-emerald-400" />
-            视图域:
+            {c.viewScope}
           </span>
-          {MODULE_TABS.map((t) => (
+          {MODULE_TAB_KEYS.map((key) => (
             <button
-              key={t.key}
+              key={key}
               type="button"
-              onClick={() => setActiveTab(t.key)}
+              onClick={() => setActiveTab(key)}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition ${
-                activeTab === t.key
+                activeTab === key
                   ? 'bg-emerald-500 text-zinc-950 font-semibold shadow'
                   : 'text-zinc-300 hover:bg-white/10 hover:text-white'
               }`}
             >
-              {t.label}
+              {c.tabs[key]}
             </button>
           ))}
         </nav>
@@ -152,64 +172,79 @@ export function ClearingConsoleClient({
         {viewState === 'LOADING' && (
           <div className="rounded-3xl border border-amber-500/30 bg-zinc-900/90 p-8 text-center backdrop-blur-xl space-y-2">
             <RefreshCw className="w-7 h-7 text-amber-400 animate-spin mx-auto" />
-            <p className="text-sm font-semibold text-white">
-              正在从 ASDCoin 复式记账核心拉取 T+0 试算平衡快照...
-            </p>
+            <p className="text-sm font-semibold text-white">{c.loadingSnapshot}</p>
           </div>
         )}
 
         {viewState === 'ERROR' && (
-          <div role="alert" className="rounded-3xl border border-rose-500/40 bg-rose-950/60 p-6 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div
+            role="alert"
+            className="rounded-3xl border border-rose-500/40 bg-rose-950/60 p-6 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-rose-300 font-bold text-sm">
                 <AlertOctagon className="w-5 h-5 shrink-0" />
-                <span>真实告警 (Zero-Fake Policy)：跨站清结算节点通讯中断</span>
+                <span>{c.errorAlertTitle}</span>
               </div>
-              <p className="text-xs font-mono text-rose-200">{errorBanner}</p>
+              <p className="text-xs text-rose-200">{resolveError(errorCode)}</p>
+              {errorCode && (
+                <code className="inline-block rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                  {errorCode}
+                </code>
+              )}
             </div>
-            <button type="button" onClick={() => fetchWithMode('NORMAL')} className="shrink-0 rounded-xl bg-rose-500 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-400 transition">
-              重连主清算通道
+            <button
+              type="button"
+              onClick={syncLedger}
+              className="shrink-0 rounded-xl bg-rose-500 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-400 transition"
+            >
+              {c.reconnectBtn}
             </button>
           </div>
         )}
 
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricGlassCard
-            title="生态流通稳定币总量"
-            subtitle="跨 29+ 矩阵站点零汇损结算"
-            value={snapshot.circulatingAsdS.toLocaleString()}
-            unit="ASD-S"
-            badgeText={snapshot.trialBalanceOk ? '借贷试算平衡' : '账务失衡告警'}
+            title={c.metricCircTitle}
+            subtitle={c.metricCircSub}
+            value={displayCirculating.toLocaleString()}
+            unit="USDF"
+            badgeText={snapshot.trialBalanceOk ? c.metricTrialOk : c.metricTrialErr}
             accent="emerald"
           />
           <MetricGlassCard
-            title="PoR 储备金充足率"
-            subtitle={`总储备 $${snapshot.totalReserveUsd.toLocaleString()} USD`}
-            value={`${snapshot.reserveRatioPct.toFixed(2)}%`}
-            unit="RESERVE"
-            badgeText=">= 100% 足额锚定"
+            title={c.metricPorTitle}
+            subtitle={`${c.metricPorSubPrefix} $${displayReservesUsd.toLocaleString()} USD`}
+            value={`${displayReserveRatio.toFixed(2)}%`}
+            unit="PoR"
+            badgeText={c.metricPorBadge}
             accent="amber"
           />
           <MetricGlassCard
-            title="AI Skill 燃料累计燃烧"
-            subtitle="按 Token / 毫秒颗粒度实时销毁"
+            title={c.metricBurnTitle}
+            subtitle={c.metricBurnSub}
             value={snapshot.totalBurnedAsdG.toLocaleString()}
-            unit="ASD-G"
-            badgeText="通缩分润引擎"
+            unit={c.metricBurnUnit}
+            badgeText={c.metricBurnBadge}
             accent="cyan"
           />
           <MetricGlassCard
-            title="四流合一合规对齐率"
-            subtitle={`实时脉冲吞吐: ${snapshot.tpsPulse} TPS`}
+            title={c.metricFlowTitle}
+            subtitle={`${c.metricFlowSubPrefix}: ${snapshot.tpsPulse} TPS`}
             value={`${snapshot.fourFlowAlignmentPct.toFixed(1)}%`}
-            unit="ALIGNED"
-            badgeText="主体+税+资+物"
+            unit={c.metricFlowUnit}
+            badgeText={c.metricFlowBadge}
             accent="purple"
           />
         </section>
 
         {(activeTab === 'ALL' || activeTab === 'USDFIRM') && (
-          <UsdfirmProtocolHub showStandaloneLink />
+          <UsdfirmProtocolHub
+            initialBundle={liveBundle ?? undefined}
+            initialErrorCode={initialBundleErrorCode}
+            showStandaloneLink
+            onBundleSync={handleLiveBundleSync}
+          />
         )}
         {(activeTab === 'ALL' || activeTab === 'RUST_CHAIN') && (
           <RustChainCorePanel accounts={snapshot.accounts} />
@@ -219,15 +254,29 @@ export function ClearingConsoleClient({
         )}
         {(activeTab === 'ALL' || activeTab === 'VAULT_SWAP') && (
           <>
-            <ReserveVaultPanel reserves={snapshot.reserves} reserveRatioPct={snapshot.reserveRatioPct} onSnapshotUpdate={handleSnapshotUpdate} />
-            <TokenSwapAndAccountsPanel accounts={snapshot.accounts} onSnapshotUpdate={handleSnapshotUpdate} />
+            <ReserveVaultPanel
+              reserves={snapshot.reserves}
+              reserveRatioPct={displayReserveRatio}
+              onSnapshotUpdate={handleSnapshotUpdate}
+            />
+            <TokenSwapAndAccountsPanel
+              accounts={snapshot.accounts}
+              onSnapshotUpdate={handleSnapshotUpdate}
+            />
           </>
         )}
         {(activeTab === 'ALL' || activeTab === 'SKILLS') && (
-          <SkillBurnMatrix skills={snapshot.skills} totalBurnedAsdG={snapshot.totalBurnedAsdG} onSnapshotUpdate={handleSnapshotUpdate} />
+          <SkillBurnMatrix
+            skills={snapshot.skills}
+            totalBurnedAsdG={snapshot.totalBurnedAsdG}
+            onSnapshotUpdate={handleSnapshotUpdate}
+          />
         )}
         {(activeTab === 'ALL' || activeTab === 'ESCROW') && (
-          <FourFlowTracker escrows={snapshot.escrowOrders} onSnapshotUpdate={handleSnapshotUpdate} />
+          <FourFlowTracker
+            escrows={snapshot.escrowOrders}
+            onSnapshotUpdate={handleSnapshotUpdate}
+          />
         )}
         {(activeTab === 'ALL' || activeTab === 'DEVELOPER') && <DeveloperSdkPanel />}
         {(activeTab === 'ALL' || activeTab === 'LEDGER') && (

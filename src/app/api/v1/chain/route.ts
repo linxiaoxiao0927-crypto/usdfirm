@@ -8,14 +8,16 @@ import {
   type ChainRollupStatus,
 } from '@/lib/crypto-chain-engine';
 
+export const dynamic = 'force-dynamic';
+
 const MerkleVerifySchema = z.object({
-  targetSite: z.string().min(3, '请输入有效的生态站点域名').max(64),
+  targetSite: z.string().min(3).max(64),
 });
 
 export type ApiResponse<T> = {
   success: boolean;
   data?: T;
-  error?: { code: string; message: string; details?: unknown };
+  error?: { code: string; errorCode?: string; message: string; details?: unknown };
 };
 
 export async function POST(request: Request) {
@@ -28,7 +30,8 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'VALIDATION_ERROR',
-            message: 'Merkle 包含性证明查询参数无效',
+            errorCode: 'ERR_VALIDATION_FAILED',
+            message: 'ERR_VALIDATION_FAILED',
             details: parsed.error.flatten().fieldErrors,
           },
         },
@@ -51,12 +54,14 @@ export async function POST(request: Request) {
     >({ success: true, data: { proof, chainStatus } }, { status: 200 });
   } catch (err) {
     console.error('[API_ERROR]', err);
-    const message =
-      err instanceof Error ? err.message : 'Merkle PoR 密码学引擎异常';
     return NextResponse.json<ApiResponse<never>>(
       {
         success: false,
-        error: { code: 'INTERNAL_ERROR', message },
+        error: {
+          code: 'INTERNAL_ERROR',
+          errorCode: 'ERR_MERKLE_ENGINE',
+          message: 'ERR_MERKLE_ENGINE',
+        },
       },
       { status: 500 }
     );

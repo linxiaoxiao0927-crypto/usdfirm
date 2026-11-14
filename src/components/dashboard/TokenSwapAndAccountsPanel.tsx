@@ -9,6 +9,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { LedgerAccountRecord, LedgerSnapshot } from '@/types/ledger';
+import { useUsdfirmLocale, extractErrorCode } from '@/lib/usdfirm/i18n';
 
 interface TokenSwapAndAccountsPanelProps {
   accounts: LedgerAccountRecord[];
@@ -19,47 +20,67 @@ export function TokenSwapAndAccountsPanel({
   accounts,
   onSnapshotUpdate,
 }: TokenSwapAndAccountsPanelProps) {
+  const { copy, resolveError } = useUsdfirmLocale();
+  const t = copy.dashboard.swap;
+
   const [ownerSite, setOwnerSite] = useState('sofayes.com');
-  const [direction, setDirection] = useState<'ASD_S_TO_G' | 'ASD_G_TO_S'>(
-    'ASD_S_TO_G'
+  const [direction, setDirection] = useState<'USDF_TO_UUSDF' | 'UUSDF_TO_USDF'>(
+    'USDF_TO_UUSDF'
   );
   const [amount, setAmount] = useState('500');
   const [status, setStatus] = useState<
     'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'
   >('IDLE');
   const [feedback, setFeedback] = useState('');
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const handleSwap = async (e: React.FormEvent) => {
     e.preventDefault();
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setStatus('ERROR');
+      setErrorCode('ERR_INVALID_AMOUNT');
+      setFeedback(resolveError('ERR_INVALID_AMOUNT'));
+      return;
+    }
+
     setStatus('LOADING');
     setFeedback('');
+    setErrorCode(null);
 
     try {
       const res = await fetch('/api/v1/swap', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ownerSite,
           ownerEntity: 'ENT-SOFA-CORE',
           direction,
-          amount: Number(amount),
+          amount: numericAmount,
           idempotencyKey: `swap-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         }),
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message ?? '双态通证闪兑失败');
+        const code = extractErrorCode(json) || 'ERR_INTERNAL_SERVER';
+        setStatus('ERROR');
+        setErrorCode(code);
+        setFeedback(resolveError(code, json.error?.message));
+        return;
       }
       onSnapshotUpdate(json.data.snapshot);
       setStatus('SUCCESS');
       setFeedback(
-        direction === 'ASD_S_TO_G'
-          ? `闪兑成功！${Number(amount).toLocaleString()} ASD-S → ${json.data.convertedAmount.toLocaleString()} ASD-G 算力燃料`
-          : `反向闪兑成功！${Number(amount).toLocaleString()} ASD-G → ${json.data.convertedAmount.toLocaleString()} ASD-S 稳定币`
+        direction === 'USDF_TO_UUSDF'
+          ? t.formatForwardSuccess(numericAmount, json.data.convertedAmount)
+          : t.formatReverseSuccess(numericAmount, json.data.convertedAmount)
       );
-    } catch (err) {
+    } catch {
+      const code = 'ERR_LEDGER_SYNC_FAILED';
       setStatus('ERROR');
-      setFeedback(err instanceof Error ? err.message : '闪兑网络错误');
+      setErrorCode(code);
+      setFeedback(resolveError(code));
     }
   };
 
@@ -69,20 +90,19 @@ export function TokenSwapAndAccountsPanel({
         <div>
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white">
-              ASD-S ⇄ ASD-G 零滑点闪兑与各站点账本实时余额舱
-            </h2>
+            <h2 className="text-lg font-bold text-white">{t.title}</h2>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
-            恒定汇率 <span className="text-emerald-300 font-mono">1 ASD-S = 1,000,000 ASD-G</span>，支持各矩阵站点一键补充微粒化 AI 算力燃料
+            {t.subtitlePrefix}{' '}
+            <span className="text-emerald-300 font-mono">{t.subtitleRate}</span>
+            {t.subtitleSuffix}
           </p>
         </div>
       </div>
 
-      {/* 各站点复式记账子账户余额矩阵 */}
       {accounts.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
-          当前暂无已初始化的站点总账账户 (Empty State)
+          {t.emptyAccounts}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -104,13 +124,13 @@ export function TokenSwapAndAccountsPanel({
                 </div>
                 <div className="pt-1 space-y-1 font-mono text-xs">
                   <div className="flex justify-between">
-                    <span className="text-zinc-400">稳定币 (ASD-S):</span>
+                    <span className="text-zinc-400">{t.stableLabel}</span>
                     <span className="text-emerald-400 font-bold">
                       {acc.asdStableBal.toLocaleString()}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-400">算力燃料 (ASD-G):</span>
+                    <span className="text-zinc-400">{t.gasLabel}</span>
                     <span className="text-amber-300 font-bold">
                       {acc.asdGasBal.toLocaleString()}
                     </span>
@@ -121,15 +141,15 @@ export function TokenSwapAndAccountsPanel({
         </div>
       )}
 
-      {/* 闪兑交互表单 */}
       <form
         onSubmit={handleSwap}
+        noValidate
         className="rounded-2xl border border-white/10 bg-zinc-950/75 p-5 space-y-4"
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              操作站点账户
+              {t.siteLabel}
             </label>
             <select
               value={ownerSite}
@@ -143,28 +163,24 @@ export function TokenSwapAndAccountsPanel({
           </div>
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              闪兑方向 (Zero-Slippage)
+              {t.directionLabel}
             </label>
             <select
               value={direction}
               onChange={(e) => {
-                const nextDir = e.target.value as 'ASD_S_TO_G' | 'ASD_G_TO_S';
+                const nextDir = e.target.value as 'USDF_TO_UUSDF' | 'UUSDF_TO_USDF';
                 setDirection(nextDir);
-                setAmount(nextDir === 'ASD_S_TO_G' ? '500' : '50000000');
+                setAmount(nextDir === 'USDF_TO_UUSDF' ? '500' : '50000000');
               }}
               className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white"
             >
-              <option value="ASD_S_TO_G">
-                ASD-S 稳定币 → ASD-G 燃料 (×10⁶)
-              </option>
-              <option value="ASD_G_TO_S">
-                ASD-G 燃料 → ASD-S 稳定币 (÷10⁶)
-              </option>
+              <option value="USDF_TO_UUSDF">{t.dirUsdfToUusdf}</option>
+              <option value="UUSDF_TO_USDF">{t.dirUusdfToUsdf}</option>
             </select>
           </div>
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              输入数量 ({direction === 'ASD_S_TO_G' ? 'ASD-S' : 'ASD-G'})
+              {t.amountPrefix} ({direction === 'USDF_TO_UUSDF' ? 'USDF' : 'uUSDF'})
             </label>
             <input
               type="number"
@@ -176,18 +192,25 @@ export function TokenSwapAndAccountsPanel({
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-          <div className="text-xs">
+          <div className="text-xs flex items-center gap-2">
             {status === 'LOADING' && (
               <span className="inline-flex items-center gap-1.5 text-amber-300">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                正在执行原子级双账本闪兑...
+                {t.loadingMsg}
               </span>
             )}
             {status === 'ERROR' && (
-              <span className="inline-flex items-center gap-1.5 text-rose-400">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                {feedback}
-              </span>
+              <>
+                <span className="inline-flex items-center gap-1.5 text-rose-400">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {feedback}
+                </span>
+                {errorCode && (
+                  <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                    {errorCode}
+                  </code>
+                )}
+              </>
             )}
             {status === 'SUCCESS' && (
               <span className="inline-flex items-center gap-1.5 text-emerald-400">
@@ -201,7 +224,7 @@ export function TokenSwapAndAccountsPanel({
             disabled={status === 'LOADING'}
             className="rounded-xl bg-amber-500 px-4 py-2 text-xs font-semibold text-zinc-950 hover:bg-amber-400 disabled:opacity-50 transition"
           >
-            执行零滑点闪兑
+            {t.submitBtn}
           </button>
         </div>
       </form>

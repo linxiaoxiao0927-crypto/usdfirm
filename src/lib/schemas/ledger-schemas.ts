@@ -75,8 +75,8 @@ export type EscrowCreateInput = z.infer<typeof EscrowCreateSchema>;
 export const TokenSwapSchema = z.object({
   ownerSite: z.string().min(3).max(64),
   ownerEntity: z.string().min(2).max(64),
-  direction: z.enum(['ASD_S_TO_G', 'ASD_G_TO_S']),
-  amount: z.number().positive('闪兑数量必须大于 0').max(100_000_000_000),
+  direction: z.enum(['USDF_TO_UUSDF', 'UUSDF_TO_USDF']),
+  amount: z.number().positive('ERR_INVALID_AMOUNT').max(100_000_000_000),
   idempotencyKey: z.string().min(6).max(128),
 });
 

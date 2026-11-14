@@ -1,5 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import type {
   LedgerAccountRecord,
   LedgerEntryRecord,
@@ -24,15 +22,9 @@ export interface LedgerMemoryState {
   processedKeys: Set<string>;
 }
 
-const WAL_FILE_PATH = path.join(process.cwd(), '.asdcoin-wal.json');
-
 const globalForLedger = globalThis as unknown as {
-  __asdLedgerState?: LedgerMemoryState;
+  __usdfLedgerState?: LedgerMemoryState;
 };
-
-function isTestRuntime(): boolean {
-  return process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
-}
 
 export function createFreshState(): LedgerMemoryState {
   const entries = createInitialEntries();
@@ -46,59 +38,21 @@ export function createFreshState(): LedgerMemoryState {
   };
 }
 
-export function persistLedgerWal(state: LedgerMemoryState): void {
-  if (isTestRuntime()) return;
-  try {
-    const serialized = JSON.stringify(
-      {
-        accounts: state.accounts,
-        entries: state.entries,
-        escrows: state.escrows,
-        reserves: state.reserves,
-        federationNodes: state.federationNodes,
-        processedKeys: Array.from(state.processedKeys),
-      },
-      null,
-      2
-    );
-    fs.writeFileSync(WAL_FILE_PATH, serialized, 'utf8');
-  } catch (err) {
-    console.warn('[WAL_PERSIST_WARN]', err);
-  }
-}
-
-function loadFromWalOrFresh(): LedgerMemoryState {
-  if (!isTestRuntime() && fs.existsSync(WAL_FILE_PATH)) {
-    try {
-      const raw = fs.readFileSync(WAL_FILE_PATH, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed.accounts) && Array.isArray(parsed.entries)) {
-        return {
-          accounts: parsed.accounts,
-          entries: parsed.entries,
-          escrows: parsed.escrows ?? createInitialEscrows(),
-          reserves: parsed.reserves ?? createInitialReserves(),
-          federationNodes:
-            parsed.federationNodes ?? createInitialFederationNodes(),
-          processedKeys: new Set(parsed.processedKeys ?? []),
-        };
-      }
-    } catch (err) {
-      console.warn('[WAL_LOAD_WARN]', err);
-    }
-  }
-  return createFreshState();
+export function persistLedgerWal(_state: LedgerMemoryState): void {
+  // Authoritative clearing state persists on the Cloudflare Durable Object Worker
+  // (usdfirm-rt-protocol). Serverless runtime keeps in-memory state only without
+  // writing local disk JSON WAL files.
 }
 
 export function getState(): LedgerMemoryState {
-  if (!globalForLedger.__asdLedgerState) {
-    globalForLedger.__asdLedgerState = loadFromWalOrFresh();
+  if (!globalForLedger.__usdfLedgerState) {
+    globalForLedger.__usdfLedgerState = createFreshState();
   }
-  return globalForLedger.__asdLedgerState;
+  return globalForLedger.__usdfLedgerState;
 }
 
 export function resetLedgerStoreForTesting(): void {
-  globalForLedger.__asdLedgerState = createFreshState();
+  globalForLedger.__usdfLedgerState = createFreshState();
 }
 
 export function assertIdempotency(
@@ -106,9 +60,7 @@ export function assertIdempotency(
   key: string
 ): void {
   if (state.processedKeys.has(key)) {
-    throw new Error(
-      `IDEMPOTENCY_CONFLICT: 幂等键 ${key} 已处理，严禁重复清算`
-    );
+    throw new Error(`ERR_IDEMPOTENCY_CONFLICT: ${key}`);
   }
 }
 

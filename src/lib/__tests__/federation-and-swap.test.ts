@@ -8,7 +8,7 @@ import {
   executeFederationEvent,
 } from '@/lib/federation-engine';
 
-describe('ASDCoin Cross-Site Federation Bus & Atomic Flash Swap', () => {
+describe('USDFirm Cross-Site Federation Bus & Atomic Flash Swap', () => {
   beforeEach(() => {
     resetLedgerStoreForTesting();
   });
@@ -27,7 +27,7 @@ describe('ASDCoin Cross-Site Federation Bus & Atomic Flash Swap', () => {
     expect(domains).toContain('dezi.life');
   });
 
-  it('atomically swaps ASD-S to ASD-G (1:1,000,000) and preserves trial balance', () => {
+  it('atomically swaps USDF to uUSDF (1:1,000,000) and preserves trial balance', () => {
     const before = getLedgerSnapshot();
     const sofaBefore = before.accounts.find(
       (a) => a.ownerSite === 'sofayes.com'
@@ -36,7 +36,7 @@ describe('ASDCoin Cross-Site Federation Bus & Atomic Flash Swap', () => {
     const swapRes = executeTokenSwap({
       ownerSite: 'sofayes.com',
       ownerEntity: 'ENT-SOFA-CORE',
-      direction: 'ASD_S_TO_G',
+      direction: 'USDF_TO_UUSDF',
       amount: 100,
       idempotencyKey: 'idem-swap-s2g-001',
     });

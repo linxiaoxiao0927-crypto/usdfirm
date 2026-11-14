@@ -8,7 +8,7 @@ import {
   executeEscrowCreate,
 } from '@/lib/ledger-engine';
 
-describe('ASDCoin Double-Entry & 4-Flow Ledger Engine', () => {
+describe('USDFirm Double-Entry & 4-Flow Ledger Engine', () => {
   beforeEach(() => {
     resetLedgerStoreForTesting();
   });
@@ -21,7 +21,7 @@ describe('ASDCoin Double-Entry & 4-Flow Ledger Engine', () => {
     expect(snap.skills.length).toBe(6);
   });
 
-  it('mints and redeems ASD-S 1:1 with USD reserve and enforces idempotency', () => {
+  it('mints and redeems USDF 1:1 with USD reserve and enforces idempotency', () => {
     const before = getLedgerSnapshot();
     const res = executeMintOrRedeem({
       action: 'MINT',
@@ -53,7 +53,7 @@ describe('ASDCoin Double-Entry & 4-Flow Ledger Engine', () => {
     ).toThrow(/IDEMPOTENCY_CONFLICT/);
   });
 
-  it('burns ASD-G for AI Business Skills and splits provider & treasury burn', () => {
+  it('burns uUSDF for AI Business Skills and splits provider & treasury burn', () => {
     const before = getLedgerSnapshot();
     const burnRes = executeSkillGasBurn({
       callerSite: 'sofayes.com',

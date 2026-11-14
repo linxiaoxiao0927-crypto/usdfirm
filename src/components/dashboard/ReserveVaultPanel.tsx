@@ -10,6 +10,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { ReserveAssetItem, LedgerSnapshot } from '@/types/ledger';
+import { useUsdfirmLocale, extractErrorCode } from '@/lib/usdfirm/i18n';
 
 interface ReserveVaultPanelProps {
   reserves: ReserveAssetItem[];
@@ -22,6 +23,9 @@ export function ReserveVaultPanel({
   reserveRatioPct,
   onSnapshotUpdate,
 }: ReserveVaultPanelProps) {
+  const { copy, resolveError } = useUsdfirmLocale();
+  const t = copy.dashboard.vault;
+
   const [action, setAction] = useState<'MINT' | 'REDEEM'>('MINT');
   const [channel, setChannel] = useState<'XPAYES_VIBAN' | 'ITISCOIN_CHAIN'>(
     'XPAYES_VIBAN'
@@ -32,16 +36,26 @@ export function ReserveVaultPanel({
     'IDLE' | 'LOADING' | 'SUCCESS' | 'ERROR'
   >('IDLE');
   const [feedbackMsg, setFeedbackMsg] = useState('');
+  const [errorCode, setErrorCode] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const numericAmount = Number(amountUsd);
+    if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+      setStatus('ERROR');
+      setErrorCode('ERR_INVALID_AMOUNT');
+      setFeedbackMsg(resolveError('ERR_INVALID_AMOUNT'));
+      return;
+    }
+
     setStatus('LOADING');
     setFeedbackMsg('');
+    setErrorCode(null);
 
     try {
-      const numericAmount = Number(amountUsd);
       const res = await fetch('/api/v1/mint', {
         method: 'POST',
+        cache: 'no-store',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action,
@@ -54,18 +68,24 @@ export function ReserveVaultPanel({
       });
       const json = await res.json();
       if (!res.ok || !json.success) {
-        throw new Error(json.error?.message ?? '铸造/赎回请求被拒绝');
+        const code = extractErrorCode(json) || 'ERR_INTERNAL_SERVER';
+        setStatus('ERROR');
+        setErrorCode(code);
+        setFeedbackMsg(resolveError(code, json.error?.message));
+        return;
       }
       onSnapshotUpdate(json.data.snapshot);
       setStatus('SUCCESS');
       setFeedbackMsg(
-        `已完成 ${numericAmount.toLocaleString()} ASD-S ${
-          action === 'MINT' ? '1:1 储备铸造' : '1:1 赎回销毁'
-        }，哈希: ${json.data.entry.txHash}`
+        action === 'MINT'
+          ? t.formatMintSuccess(numericAmount, json.data.entry.txHash)
+          : t.formatRedeemSuccess(numericAmount, json.data.entry.txHash)
       );
-    } catch (err) {
+    } catch {
+      const code = 'ERR_LEDGER_SYNC_FAILED';
       setStatus('ERROR');
-      setFeedbackMsg(err instanceof Error ? err.message : '未知网络错误');
+      setErrorCode(code);
+      setFeedbackMsg(resolveError(code));
     }
   };
 
@@ -75,25 +95,24 @@ export function ReserveVaultPanel({
         <div>
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">
-              铸币、赎回与 PoR 储备金透明舱
-            </h2>
+            <h2 className="text-lg font-bold text-white">{t.title}</h2>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
-            联动 <span className="text-amber-400 font-mono">xpayes.com</span>{' '}
-            法币备付金池与{' '}
+            {t.subtitlePrefix}{' '}
+            <span className="text-amber-400 font-mono">xpayes.com</span>{' '}
+            {t.subtitleMid}{' '}
             <span className="text-cyan-400 font-mono">itiscoin.com</span>{' '}
-            多签金库，100%+ 足额 Merkle 审计
+            {t.subtitleEnd}
           </p>
         </div>
         <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono text-emerald-300">
-          PoR 储备率: {reserveRatioPct.toFixed(2)}%
+          {t.ratioPrefix} {reserveRatioPct.toFixed(2)}%
         </span>
       </div>
 
       {reserves.length === 0 ? (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
-          暂无储备金托管池快照数据 (Empty State)
+          {t.emptyReserves}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,17 +126,17 @@ export function ReserveVaultPanel({
                   {item.channelDomain}
                 </span>
                 <span className="text-zinc-400">
-                  权重 {item.allocationPct.toFixed(0)}%
+                  {t.weightPrefix} {item.allocationPct.toFixed(0)}%
                 </span>
               </div>
               <p className="text-sm font-semibold text-white">
-                {item.assetName}
+                {t.assetNames[item.id] ?? item.assetName}
               </p>
               <p className="text-xl font-bold font-mono text-emerald-400">
                 ${item.usdValue.toLocaleString()} USD
               </p>
               <p className="text-[11px] font-mono text-zinc-500 truncate">
-                Merkle: {item.merkleRoot}
+                {t.merklePrefix} {item.merkleRoot}
               </p>
             </div>
           ))}
@@ -126,11 +145,12 @@ export function ReserveVaultPanel({
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="rounded-2xl border border-white/10 bg-zinc-950/70 p-5 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
-            执行 1:1 跨站铸造 / 赎回指令
+            {t.formTitle}
           </span>
           <div className="flex rounded-xl bg-zinc-900 p-1 border border-white/10">
             <button
@@ -143,7 +163,7 @@ export function ReserveVaultPanel({
               }`}
             >
               <ArrowUpRight className="w-3.5 h-3.5" />
-              铸造 ASD-S
+              {t.mintTab}
             </button>
             <button
               type="button"
@@ -155,7 +175,7 @@ export function ReserveVaultPanel({
               }`}
             >
               <ArrowDownLeft className="w-3.5 h-3.5" />
-              赎回 USD
+              {t.redeemTab}
             </button>
           </div>
         </div>
@@ -163,22 +183,22 @@ export function ReserveVaultPanel({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              目标生态站点
+              {t.siteLabel}
             </label>
             <select
               value={ownerSite}
               onChange={(e) => setOwnerSite(e.target.value)}
               className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
             >
-              <option value="sofayes.com">sofayes.com (母舰)</option>
-              <option value="hmm.sale">hmm.sale (跨境商城)</option>
-              <option value="dezi.life">dezi.life (嘚滋供应链)</option>
-              <option value="sheng.sale">sheng.sale (省手特卖)</option>
+              <option value="sofayes.com">{t.siteSofayes}</option>
+              <option value="hmm.sale">{t.siteHmm}</option>
+              <option value="dezi.life">{t.siteDezi}</option>
+              <option value="sheng.sale">{t.siteSheng}</option>
             </select>
           </div>
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              清算储备通道
+              {t.channelLabel}
             </label>
             <select
               value={channel}
@@ -189,13 +209,13 @@ export function ReserveVaultPanel({
               }
               className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white focus:border-emerald-500 focus:outline-none"
             >
-              <option value="XPAYES_VIBAN">XPayes vIBAN 法币网关</option>
-              <option value="ITISCOIN_CHAIN">ItisCoin 链上稳定币池</option>
+              <option value="XPAYES_VIBAN">{t.channelXpayes}</option>
+              <option value="ITISCOIN_CHAIN">{t.channelItiscoin}</option>
             </select>
           </div>
           <div>
             <label className="block text-[11px] text-zinc-400 mb-1">
-              金额 (USD / ASD-S)
+              {t.amountLabel}
             </label>
             <input
               type="number"
@@ -207,18 +227,25 @@ export function ReserveVaultPanel({
         </div>
 
         <div className="flex items-center justify-between gap-3 pt-1">
-          <div className="text-xs">
+          <div className="text-xs flex items-center gap-2">
             {status === 'LOADING' && (
               <span className="inline-flex items-center gap-1.5 text-amber-300">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                正在同步复式记账总账与 Merkle 树...
+                {t.loadingMsg}
               </span>
             )}
             {status === 'ERROR' && (
-              <span className="inline-flex items-center gap-1.5 text-rose-400">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                {feedbackMsg}
-              </span>
+              <>
+                <span className="inline-flex items-center gap-1.5 text-rose-400">
+                  <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                  {feedbackMsg}
+                </span>
+                {errorCode && (
+                  <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                    {errorCode}
+                  </code>
+                )}
+              </>
             )}
             {status === 'SUCCESS' && (
               <span className="inline-flex items-center gap-1.5 text-emerald-400">
@@ -232,7 +259,7 @@ export function ReserveVaultPanel({
             disabled={status === 'LOADING'}
             className="shrink-0 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition"
           >
-            立即执行清算
+            {t.submitBtn}
           </button>
         </div>
       </form>

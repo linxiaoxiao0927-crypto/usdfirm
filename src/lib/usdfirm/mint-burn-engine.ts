@@ -6,19 +6,28 @@ import { UsdfMultiSigTimelock } from './multisig-timelock';
 import { UsdfAuditTrail } from './audit-trail';
 
 export interface InitiateMintRequest {
-  partnerSite: 'xpayes.com' | 'itisdeal.com' | 'institutional_direct';
+  partnerSite: 'xpayes.com' | 'institutional_direct' | 'usdfirm.com' | 'hmm.sale' | 'sheng.sale' | 'sofayes.com';
   requesterPubkey: string;
   amountUsd: number;
   xpayesRef?: string;
-  itisdealRef?: string;
+  segregatedMmRef?: string;
 }
 
 export interface InitiateBurnRequest {
-  partnerSite: 'xpayes.com' | 'itisdeal.com' | 'institutional_direct';
+  partnerSite: 'xpayes.com' | 'segregated_mm_desk' | 'institutional_direct' | 'usdfirm.com' | 'hmm.sale' | 'sheng.sale' | 'sofayes.com';
   requesterPubkey: string;
   amountUsdf: number;
   burnAuthorizationSignature: string;
 }
+
+const ALLOWED_MINT_PARTNERS = new Set([
+  'xpayes.com',
+  'institutional_direct',
+  'usdfirm.com',
+  'hmm.sale',
+  'sheng.sale',
+  'sofayes.com',
+]);
 
 export class UsdfMintBurnEngine {
   private static instance: UsdfMintBurnEngine;
@@ -50,7 +59,7 @@ export class UsdfMintBurnEngine {
       status: 'EXECUTED',
       txHash: '0x' + createHash('sha256').update('seed_mint_01').digest('hex'),
       xpayesRef: 'XPAY-WIRE-9921',
-      itisdealRef: null,
+      segregatedMmRef: null,
       timelockEta: null,
       executedAt: new Date(Date.now() - 3600 * 1000).toISOString(),
       createdAt: new Date(Date.now() - 3650 * 1000).toISOString(),
@@ -62,6 +71,9 @@ export class UsdfMintBurnEngine {
   }
 
   public requestMint(req: InitiateMintRequest): UsdfMintBurnOrderRecord {
+    if (!ALLOWED_MINT_PARTNERS.has(String(req.partnerSite))) {
+      throw new Error('ERR_COMPLIANCE_FIREWALL_USE_SEGREGATED_BRIDGE');
+    }
     if (this.blacklistedAddresses.has(req.requesterPubkey.toLowerCase())) {
       throw new Error('COMPLIANCE_BLOCKED: Sanctioned or OFAC blacklisted recipient address');
     }
@@ -74,7 +86,7 @@ export class UsdfMintBurnEngine {
 
     const orderNo = `ORD-MINT-${Date.now().toString(36).toUpperCase()}`;
     const feeUsd = Number((req.amountUsd * 0.0005).toFixed(2)); // 5 bps fee
-    const isLargeTimelockRequired = req.amountUsd >= 1_000_000;
+    const isLargeTimelockRequired = req.amountUsd > 2_000_000;
 
     let status: UsdfMintBurnOrderRecord['status'] = 'EXECUTED';
     let timelockEta: string | null = null;
@@ -106,7 +118,7 @@ export class UsdfMintBurnEngine {
       status,
       txHash,
       xpayesRef: req.xpayesRef ?? null,
-      itisdealRef: req.itisdealRef ?? null,
+      segregatedMmRef: req.segregatedMmRef ?? null,
       timelockEta,
       executedAt,
       createdAt: new Date().toISOString(),
@@ -148,7 +160,7 @@ export class UsdfMintBurnEngine {
       status: 'EXECUTED',
       txHash,
       xpayesRef: null,
-      itisdealRef: null,
+      segregatedMmRef: null,
       timelockEta: null,
       executedAt,
       createdAt: executedAt,

@@ -1,6 +1,7 @@
 export interface StarColor {
   key: string;
   label: string;
+  labelEn: string;
   domainGroup: string;
   r: number;
   g: number;
@@ -12,6 +13,7 @@ export const MATRIX_PALETTE: StarColor[] = [
   {
     key: 'emerald',
     label: '企服基建',
+    labelEn: 'B2B Infra',
     domainGroup: 'setupyes / taxyesai / uptoyes',
     r: 16,
     g: 185,
@@ -21,7 +23,8 @@ export const MATRIX_PALETTE: StarColor[] = [
   {
     key: 'amber',
     label: '金控清算',
-    domainGroup: 'xpayes / itiscoin / asdcoin',
+    labelEn: 'FinTech Core',
+    domainGroup: 'xpayes / usdfirm / itiscoin',
     r: 245,
     g: 158,
     b: 11,
@@ -30,6 +33,7 @@ export const MATRIX_PALETTE: StarColor[] = [
   {
     key: 'cyan',
     label: 'AI 算力',
+    labelEn: 'AI & Compute',
     domainGroup: 'sofayes / idles / fitjob / tocads',
     r: 0,
     g: 229,
@@ -39,6 +43,7 @@ export const MATRIX_PALETTE: StarColor[] = [
   {
     key: 'purple',
     label: '零售消费',
+    labelEn: 'Retail Matrix',
     domainGroup: 'hmm.sale / sheng.sale / dezi.life',
     r: 168,
     g: 85,
