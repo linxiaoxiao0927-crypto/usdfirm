@@ -13,3 +13,9 @@ target/
 next-env.d.ts
 .vercel
 .env*
+
+# Native iOS build artifacts
+ios-app/build/
+ios-app/build-sim/
+ios-app/**/DerivedData*/
+*.ipa

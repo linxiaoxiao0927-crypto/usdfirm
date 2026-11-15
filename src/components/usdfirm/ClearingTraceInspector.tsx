@@ -76,32 +76,32 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
   ];
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-[#090A0F]/90 p-6 backdrop-blur-xl shadow-2xl space-y-5">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-5">
+      <div className="flex flex-wrap items-start justify-between gap-3 pb-1">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <GitMerge className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base sm:text-lg font-bold text-white">{tr.title}</h3>
+            <GitMerge className="w-5 h-5 text-[#FCD34D]" />
+            <h3 className="text-base sm:text-lg font-bold text-[#F4F4F6]">{tr.title}</h3>
           </div>
-          <p className="text-xs text-zinc-400">{tr.subtitle}</p>
+          <p className="text-xs text-white/60">{tr.subtitle}</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="flex flex-wrap items-center gap-2 text-xs">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-white/45 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={traceIdInput}
             onChange={(e) => setTraceIdInput(e.target.value)}
             placeholder={tr.placeholder}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 pl-9 pr-3 py-2 font-mono text-white placeholder:text-zinc-500 focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-full bg-white/[0.075] focus:bg-white/[0.12] pl-9 pr-3.5 py-2.5 font-mono text-[#F4F4F6] placeholder:text-white/40 focus:outline-none"
           />
         </div>
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 font-bold text-zinc-950 hover:bg-amber-400 disabled:opacity-50 transition"
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D] px-4 py-2.5 font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
         >
           {loading ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
           {tr.inspectBtn}
@@ -113,7 +113,7 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
             setTraceIdInput('');
             void queryTrace('');
           }}
-          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-zinc-300 hover:bg-white/10 transition"
+          className="rounded-full bg-[#24262C] px-3.5 py-2.5 text-white/75 hover:bg-[#26272B] transition"
         >
           {tr.showAllBtn}
         </button>
@@ -121,7 +121,7 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
 
       {quickTraceIds.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-zinc-400">{tr.quickPicks}</span>
+          <span className="text-white/55">{tr.quickPicks}</span>
           {quickTraceIds.map((id) => (
             <button
               key={id}
@@ -130,10 +130,10 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
                 setTraceIdInput(id);
                 void queryTrace(id);
               }}
-              className={`rounded-lg border px-2 py-0.5 font-mono transition ${
+              className={`rounded-full px-3 py-1 font-mono transition ${
                 activeTraceId === id
-                  ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                  : 'border-white/10 bg-white/5 text-zinc-300 hover:bg-white/10'
+                  ? 'bg-white text-[#090A0F] font-semibold'
+                  : 'bg-[#24262C] text-white/70 hover:bg-[#26272B]'
               }`}
             >
               {id}
@@ -145,27 +145,27 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
       {errorCode && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-3.5 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-3.5 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0" />
             {resolveError(errorCode)}
           </span>
-          <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorCode}
           </code>
         </div>
       )}
 
       {loading && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-4 text-xs font-mono text-amber-300 flex items-center gap-2">
+        <div className="rounded-2xl bg-[#24262C] p-4 text-xs font-mono text-[#FCD34D] flex items-center gap-2">
           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
           {tr.loading}
         </div>
       )}
 
       {!loading && activeTraceHops.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-4 text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-4 text-xs text-white/60">
           {tr.empty}
         </div>
       ) : (
@@ -177,37 +177,35 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
               return (
                 <div
                   key={stage.seq}
-                  className={`rounded-2xl border p-3.5 space-y-1.5 ${
-                    matchedHop
-                      ? 'border-emerald-500/40 bg-emerald-950/20'
-                      : 'border-white/10 bg-zinc-950/70'
+                  className={`rounded-2xl p-3.5 space-y-1.5 ${
+                    matchedHop ? 'sm-bento-emerald' : 'bg-[#24262C]'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-1">
-                    <span className="font-semibold text-white text-[11px]">{stage.label}</span>
+                    <span className="font-semibold text-[#F4F4F6] text-[11px]">{stage.label}</span>
                     {matchedHop ? (
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#00DC6D] shrink-0" />
                     ) : (
-                      <Clock className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                      <Clock className="w-3.5 h-3.5 text-white/40 shrink-0" />
                     )}
                   </div>
                   {matchedHop ? (
                     <div className="space-y-1 font-mono text-[11px]">
-                      <p className="text-emerald-300 font-bold">
+                      <p className="text-[#6EE7B7] font-bold">
                         {localizeAction(matchedHop.action)} ({localizeStatus(matchedHop.status)})
                       </p>
-                      <p className="text-zinc-300">
+                      <p className="text-white/80">
                         {matchedHop.caller} → {matchedHop.receiver}
                       </p>
-                      <p className="text-amber-300">
+                      <p className="text-[#FCD34D]">
                         ${Number(matchedHop.amount).toLocaleString()} {matchedHop.asset}
                       </p>
-                      <p className="text-[10px] text-zinc-500 truncate">
+                      <p className="text-[10px] text-white/55 truncate">
                         {tr.receiptHash}: {matchedHop.receipt_hash}
                       </p>
                     </div>
                   ) : (
-                    <p className="text-[11px] text-zinc-500">{tr.awaitingHop}</p>
+                    <p className="text-[11px] text-white/45">{tr.awaitingHop}</p>
                   )}
                 </div>
               );
@@ -219,24 +217,26 @@ export function ClearingTraceInspector({ recentTraces = [] }: ClearingTraceInspe
             {traces.map((item) => (
               <div
                 key={item.id}
-                className="rounded-xl border border-white/10 bg-zinc-950/80 px-3 py-2 flex flex-wrap items-center justify-between gap-2"
+                className="rounded-xl bg-[#24262C] hover:bg-[#26272B] transition px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2"
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 text-emerald-300 font-bold">
+                  <span className="rounded-full bg-[#00DC6D]/15 px-2 py-0.5 text-[#00DC6D] font-bold">
                     {tr.formatHopBadge(item.hop_seq)}
                   </span>
-                  <span className="text-amber-300">{item.trace_id}</span>
-                  <span className="text-white">{localizeAction(item.action)}</span>
-                  <span className="text-zinc-400">
+                  <span className="text-[#FCD34D]">{item.trace_id}</span>
+                  <span className="text-[#F4F4F6]">{localizeAction(item.action)}</span>
+                  <span className="text-white/55">
                     ({item.caller} → {item.receiver})
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-emerald-400 font-bold">
+                  <span className="text-[#00DC6D] font-bold">
                     ${Number(item.amount).toLocaleString()} {item.asset}
                   </span>
-                  <span className="text-zinc-500">
-                    {new Date(item.created_at).toLocaleTimeString(locale === 'zh' ? 'zh-CN' : 'en-US')}
+                  <span className="text-white/45">
+                    {new Date(item.created_at).toLocaleTimeString(
+                      locale === 'zh' ? 'zh-CN' : 'en-US'
+                    )}
                   </span>
                 </div>
               </div>

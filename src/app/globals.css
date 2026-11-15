@@ -2,11 +2,142 @@
 
 :root {
   color-scheme: dark;
+  --sofa-ui-scale: 1;
+  --sm-bg-root: #090a0f;
+  --sm-bg-stage: #111215;
+  --sm-bg-elevated-stage: #18191c;
+  --sm-bg-sidebar: #131416;
+  --sm-bg-dock: rgba(20, 21, 25, 0.88);
+  --sm-block-1: #1c1d21;
+  --sm-block-2: #24262c;
+  --sm-block-active: #26272b;
+  --sm-input-bg: rgba(255, 255, 255, 0.075);
+  --sm-accent: #00dc6d;
+  --sm-accent-hover: #19e67c;
+  --sm-accent-soft: rgba(0, 220, 109, 0.15);
+  --sm-accent-text: #090a0f;
+  --sm-gold: #d4a853;
+  --sm-gold-bright: #fcd34d;
+  --sm-gold-soft: rgba(212, 168, 83, 0.15);
+}
+
+html {
+  background-color: var(--sm-bg-root);
 }
 
 body {
-  background-color: #090A0F;
-  color: #F4F4F5;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--sm-bg-stage);
+  color: #f4f4f6;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    "PingFang SC", "Segoe UI", Roboto, sans-serif;
+  font-variant-numeric: tabular-nums;
   overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html[data-sm-compact="1"] .sm-card {
+  padding: 0.9rem !important;
+  border-radius: 1.15rem !important;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111215;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 220, 109, 0.5);
+}
+
+/* SofaMusic emerald_matrix: Borderless by Default */
+:where(
+  .border,
+  .border-2,
+  .border-4,
+  .border-8,
+  .border-x,
+  .border-y,
+  .border-dashed,
+  .ring,
+  .ring-1,
+  .ring-2,
+  .ring-4
+):not(.animate-spin) {
+  border-width: 0 !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}
+
+.border-b,
+.border-t,
+.border-l,
+.border-r {
+  border-color: rgba(255, 255, 255, 0.045) !important;
+}
+
+.sm-card:not([class*="sm-bento-"]),
+[class~="bg-[#141417]"]:not([class*="sm-bento-"]),
+[class~="bg-[#161618]"]:not([class*="sm-bento-"]),
+[class~="bg-zinc-900/75"]:not([class*="sm-bento-"]) {
+  background-color: #1c1d21 !important;
+  border-width: 0 !important;
+  box-shadow: none !important;
+}
+
+:where(.rounded-xl, .rounded-2xl, .rounded-3xl, .rounded-full):where(
+  [class~="bg-black/20"],
+  [class~="bg-black/25"],
+  [class~="bg-black/30"],
+  [class~="bg-black/40"],
+  [class~="bg-black/50"]
+):not([class*="sm-bento-"]),
+.sm-card :where(
+  [class*="bg-white/[0.01"],
+  [class*="bg-white/[0.02"],
+  [class*="bg-white/[0.03"],
+  [class*="bg-white/[0.04"]
+):not([class*="sm-bento-"]) {
+  background-color: #24262c !important;
+}
+
+/* Velvet-Matte Bento Color Blocks */
+.sm-bento-emerald {
+  background: linear-gradient(135deg, #16342a 0%, #10201b 100%) !important;
+  border-width: 0 !important;
+}
+
+.sm-bento-slate {
+  background: linear-gradient(135deg, #242e42 0%, #151b26 100%) !important;
+  border-width: 0 !important;
+}
+
+.sm-bento-amber {
+  background: linear-gradient(135deg, #382a1e 0%, #1d1610 100%) !important;
+  border-width: 0 !important;
+}
+
+.sm-bento-plum {
+  background: linear-gradient(135deg, #32243b 0%, #19131f 100%) !important;
+  border-width: 0 !important;
+}
+
+.sm-bento-teal {
+  background: linear-gradient(135deg, #1b3236 0%, #101d20 100%) !important;
+  border-width: 0 !important;
+}
+
+.sm-bento-rose {
+  background: linear-gradient(135deg, #3e2224 0%, #1f1214 100%) !important;
+  border-width: 0 !important;
 }

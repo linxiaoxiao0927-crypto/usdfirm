@@ -86,7 +86,10 @@ export function UsdfirmProtocolHub({
   const fetchFullState = useCallback(async () => {
     setSyncing(true);
     try {
-      const res = await fetch('/api/v1/usdfirm/state', { cache: 'no-store' });
+      const res = await fetch('/api/v1/usdfirm/state', {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(8000),
+      });
       const json = await res.json();
       if (!res.ok || !json.success || !json.data) {
         setErrorCode(extractErrorCode(json) || 'ERR_WORKER_UNREACHABLE');
@@ -205,26 +208,35 @@ export function UsdfirmProtocolHub({
     };
   }, [applyBundle]);
 
+  if (!bundle && syncing) {
+    return (
+      <div className="sm-card rounded-3xl bg-[#1C1D21] p-8 text-center space-y-2">
+        <RefreshCw className="w-6 h-6 text-[#00DC6D] animate-spin mx-auto" />
+        <p className="text-xs font-mono text-white/70">{t.loadingState}</p>
+      </div>
+    );
+  }
+
   if (!bundle && errorCode) {
     return (
       <div
         role="alert"
-        className="rounded-3xl border border-rose-500/40 bg-rose-950/60 p-6 backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        className="sm-bento-rose rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div className="space-y-1">
-          <div className="flex items-center gap-2 text-rose-300 font-bold text-sm">
+          <div className="flex items-center gap-2 text-[#FDA4AF] font-bold text-sm">
             <AlertOctagon className="w-5 h-5 shrink-0" />
             <span>{t.workerErrorTitle}</span>
           </div>
-          <p className="text-xs text-rose-200">{resolveError(errorCode)}</p>
-          <code className="inline-block rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <p className="text-xs text-white/80">{resolveError(errorCode)}</p>
+          <code className="inline-block rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorCode}
           </code>
         </div>
         <button
           type="button"
           onClick={() => void fetchFullState()}
-          className="shrink-0 rounded-xl bg-rose-500 px-4 py-2 text-xs font-semibold text-white hover:bg-rose-400 transition"
+          className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-bold text-[#090A0F] hover:bg-white/90 transition"
         >
           {t.retryWorker}
         </button>
@@ -234,34 +246,34 @@ export function UsdfirmProtocolHub({
 
   if (!bundle) {
     return (
-      <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-8 text-center backdrop-blur-xl space-y-2">
-        <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin mx-auto" />
-        <p className="text-xs font-mono text-zinc-300">{t.loadingState}</p>
+      <div className="sm-card rounded-3xl bg-[#1C1D21] p-8 text-center space-y-2">
+        <RefreshCw className="w-6 h-6 text-[#00DC6D] animate-spin mx-auto" />
+        <p className="text-xs font-mono text-white/70">{t.loadingState}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-950/20 px-5 py-3.5 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#1C1D21] px-5 py-3.5">
         <div className="flex flex-wrap items-center gap-2.5 text-xs">
-          <span className="rounded-full bg-emerald-500 px-2.5 py-0.5 font-mono font-bold text-zinc-950">
+          <span className="rounded-full bg-[#00DC6D] px-3 py-0.5 font-mono font-bold text-[#090A0F]">
             {t.protocolBadge}
           </span>
-          <span className="text-zinc-300 font-medium">{t.protocolDesc}</span>
+          <span className="text-white/80 font-medium">{t.protocolDesc}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-mono ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-mono font-semibold ${
               wsState === 'LIVE'
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
+                ? 'bg-[#00DC6D]/15 text-[#00DC6D]'
                 : wsState === 'CONNECTING'
-                  ? 'border-amber-500/40 bg-amber-500/15 text-amber-300'
-                  : 'border-rose-500/40 bg-rose-500/15 text-rose-300'
+                  ? 'bg-[#D4A853]/15 text-[#FCD34D]'
+                  : 'bg-[#F87171]/15 text-[#FDA4AF]'
             }`}
           >
             <Radio
-              className={`w-3 h-3 ${wsState === 'LIVE' ? 'animate-pulse text-emerald-400' : ''}`}
+              className={`w-3 h-3 ${wsState === 'LIVE' ? 'animate-pulse text-[#00DC6D]' : ''}`}
             />
             {wsState === 'LIVE'
               ? `${t.wsLive} · ${t.onlineNodes}: ${onlineClients}`
@@ -274,16 +286,16 @@ export function UsdfirmProtocolHub({
             type="button"
             onClick={() => void fetchFullState()}
             disabled={syncing}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-mono text-zinc-200 hover:bg-white/10 transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#24262C] px-3.5 py-1.5 text-xs font-mono text-[#F4F4F6] hover:bg-[#26272B] transition"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-emerald-400' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${syncing ? 'animate-spin text-[#00DC6D]' : ''}`} />
             {t.refreshOracle}
           </button>
 
           {showStandaloneLink && (
             <Link
               href="/usdfirm"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 px-3 py-1.5 text-xs font-mono text-emerald-300 hover:bg-emerald-500/30 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-1.5 text-xs font-mono font-semibold text-[#00DC6D] hover:bg-[#00DC6D]/25 transition"
             >
               {t.dedicatedPortal}
               <ExternalLink className="w-3.5 h-3.5" />
@@ -295,10 +307,10 @@ export function UsdfirmProtocolHub({
       {errorCode && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-4 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-4 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span>{resolveError(errorCode)}</span>
-          <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorCode}
           </code>
         </div>

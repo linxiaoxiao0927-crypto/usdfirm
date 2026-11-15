@@ -1,11 +1,20 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { UsdfirmLocaleProvider } from '@/lib/usdfirm/i18n';
+import { SofaYesSplash } from '@/components/ui/SofaYesSplash';
+import { UI_PREF_BOOTSTRAP_SCRIPT } from '@/lib/uiPreferences';
 import './globals.css';
 
 const SITE_TITLE =
   'USDFirm (usdfirm.com) | 美元稳定币底层发行协议与储备金透明度公示';
 const SITE_DESC =
   'ShineMight OS Web2.5 稳定币底层发行与锚定资产矩阵：USDF 铸造/销毁协议、3-of-5 多签时间锁财资池与实时储备金证明 (PoR)，严格物理隔离于二级市场撮合与用户钱包管理。';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#111215',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.usdfirm.com'),
@@ -43,12 +52,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN" className="dark">
-      <body className="bg-[#090A0F] text-zinc-100 antialiased selection:bg-emerald-500/30 selection:text-emerald-200">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: UI_PREF_BOOTSTRAP_SCRIPT }}
+        />
+      </head>
+      <body className="bg-[#111215] text-[#F4F4F6] antialiased selection:bg-[#00DC6D]/25 selection:text-white">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
-        <UsdfirmLocaleProvider>{children}</UsdfirmLocaleProvider>
+        <UsdfirmLocaleProvider>
+          <SofaYesSplash appLabel="USDFirm · USDF Protocol" />
+          {children}
+        </UsdfirmLocaleProvider>
       </body>
     </html>
   );

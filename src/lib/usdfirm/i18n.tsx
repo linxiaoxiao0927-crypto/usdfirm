@@ -1470,7 +1470,7 @@ export function UsdfirmLocaleToggle({ className = '' }: { className?: string }) 
     <div
       role="group"
       aria-label="Language switcher"
-      className={`inline-flex items-center rounded-xl border border-white/10 bg-zinc-950/90 p-1 text-xs font-mono ${className}`}
+      className={`inline-flex items-center rounded-xl bg-white/[0.04] p-1 text-xs font-mono ${className}`}
     >
       <button
         type="button"

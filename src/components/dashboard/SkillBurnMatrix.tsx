@@ -84,26 +84,26 @@ export function SkillBurnMatrix({
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/75 p-6 sm:p-8 backdrop-blur-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 sm:p-8 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
           <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-amber-400" />
-            <h2 className="text-lg font-bold text-white">{t.title}</h2>
+            <Flame className="w-5 h-5 text-[#FCD34D]" />
+            <h2 className="text-lg font-bold text-[#F4F4F6]">{t.title}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-white/60 mt-1">
             {t.subtitlePrefix}{' '}
-            <span className="text-amber-300 font-mono">uUSDF</span>
+            <span className="text-[#FCD34D] font-mono">uUSDF</span>
             {t.subtitleSuffix}
           </p>
         </div>
-        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono text-amber-300">
+        <span className="rounded-full bg-[#D4A853]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#FCD34D]">
           {t.burnedBadgePrefix} {totalBurnedAsdG.toLocaleString()} uUSDF
         </span>
       </div>
 
       {skills.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-6 text-center text-xs text-white/60">
           {t.emptyState}
         </div>
       ) : (
@@ -115,46 +115,48 @@ export function SkillBurnMatrix({
             return (
               <div
                 key={skill.code}
-                className="flex flex-col justify-between rounded-2xl border border-white/10 bg-white/5 p-5 hover:border-emerald-500/40 transition space-y-4"
+                className="flex flex-col justify-between rounded-2xl bg-[#24262C] p-5 hover:bg-[#26272B] transition space-y-4"
               >
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="rounded-md bg-emerald-500/15 px-2 py-0.5 font-mono text-[11px] text-emerald-300 border border-emerald-500/30">
+                    <span className="rounded-full bg-[#00DC6D]/15 px-2.5 py-0.5 font-mono text-[11px] font-semibold text-[#00DC6D]">
                       {skill.code.slice(0, 8)}
                     </span>
-                    <span className="font-mono text-cyan-400 font-semibold">
+                    <span className="font-mono text-[#67E8F9] font-semibold">
                       {skill.domain}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-white">
+                  <h3 className="text-sm font-bold text-[#F4F4F6]">
                     {localizedMeta?.name ?? skill.name}
                   </h3>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
+                  <p className="text-xs text-white/60 leading-relaxed">
                     {localizedMeta?.description ?? skill.description}
                   </p>
                 </div>
 
-                <div className="space-y-3 pt-2 border-t border-white/10">
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    <span>
-                      {t.unitPricePrefix} ({localizedMeta?.unitLabel ?? skill.unitLabel})
-                    </span>
-                    <span className="font-mono text-amber-300 font-semibold">
-                      {skill.gasPerUnit.toLocaleString()} uUSDF
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-zinc-400">
-                    <span>{t.splitLabel}</span>
-                    <span className="font-mono text-emerald-300">
-                      {Math.round(skill.providerRatio * 100)}% {t.providerLabel} /{' '}
-                      {Math.round(skill.burnRatio * 100)}% {t.burnLabel}
-                    </span>
+                <div className="space-y-3 pt-2">
+                  <div className="rounded-xl bg-[#18191C] px-3 py-2 space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-white/60">
+                      <span>
+                        {t.unitPricePrefix} ({localizedMeta?.unitLabel ?? skill.unitLabel})
+                      </span>
+                      <span className="font-mono text-[#FCD34D] font-semibold">
+                        {skill.gasPerUnit.toLocaleString()} uUSDF
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-white/60">
+                      <span>{t.splitLabel}</span>
+                      <span className="font-mono text-[#6EE7B7]">
+                        {Math.round(skill.providerRatio * 100)}% {t.providerLabel} /{' '}
+                        {Math.round(skill.burnRatio * 100)}% {t.burnLabel}
+                      </span>
+                    </div>
                   </div>
                   <button
                     type="button"
                     disabled={isCalling}
                     onClick={() => triggerSkillCall(skill)}
-                    className="w-full flex items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/10 py-2 text-xs font-semibold text-white hover:bg-emerald-500 hover:text-zinc-950 hover:border-emerald-400 disabled:opacity-50 transition"
+                    className="w-full flex items-center justify-center gap-1.5 rounded-full bg-[#00DC6D] py-2.5 text-xs font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
                   >
                     {isCalling ? (
                       <>
@@ -176,27 +178,35 @@ export function SkillBurnMatrix({
       )}
 
       {status !== 'IDLE' && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 px-4 py-3 text-xs flex items-center justify-between gap-2">
+        <div
+          className={`rounded-2xl px-4 py-3 text-xs flex items-center justify-between gap-2 ${
+            status === 'ERROR'
+              ? 'sm-bento-rose'
+              : status === 'SUCCESS'
+                ? 'sm-bento-emerald'
+                : 'bg-[#24262C]'
+          }`}
+        >
           {status === 'LOADING' && (
-            <span className="text-amber-300 flex items-center gap-1.5">
+            <span className="text-[#FCD34D] flex items-center gap-1.5">
               <Loader2 className="w-4 h-4 animate-spin" />
               {t.loadingMsg}
             </span>
           )}
           {status === 'SUCCESS' && (
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
+            <span className="text-[#6EE7B7] flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-[#00DC6D]" />
               {statusMsg}
             </span>
           )}
           {status === 'ERROR' && (
             <>
-              <span className="text-rose-400 flex items-center gap-1.5">
+              <span className="text-[#FDA4AF] flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 {statusMsg}
               </span>
               {errorCode && (
-                <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
                   {errorCode}
                 </code>
               )}

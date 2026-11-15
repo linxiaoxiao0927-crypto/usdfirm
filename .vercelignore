@@ -1,0 +1,15 @@
+.git
+node_modules
+.next
+out
+dist
+ios-app
+*.ipa
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+rust-core/target
+target
+xpayes-core-engine/target

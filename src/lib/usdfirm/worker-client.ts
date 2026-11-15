@@ -303,7 +303,7 @@ export async function fetchWorkerState(
     const res = await fetchImpl(`${USDFIRM_WORKER_URL}/api/state`, {
       method: 'GET',
       cache: 'no-store',
-      signal: AbortSignal.timeout(7000),
+      signal: AbortSignal.timeout(1800),
     });
     const json = (await res.json()) as WorkerSnapshotResponse;
     if (!res.ok || !json.ok) {

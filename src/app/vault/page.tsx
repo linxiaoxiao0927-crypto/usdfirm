@@ -11,7 +11,7 @@ export default async function VaultRoutePage() {
     fetchWorkerState(),
   ]);
   return (
-    <main className="min-h-screen bg-[#090A0F]">
+    <main className="min-h-screen bg-[#111215]">
       <ClearingConsoleClient
         initialSnapshot={initialSnapshot}
         initialBundle={live.ok ? live.bundle : undefined}

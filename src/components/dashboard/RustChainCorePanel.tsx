@@ -66,61 +66,61 @@ export function RustChainCorePanel({ accounts }: RustChainCorePanelProps) {
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/75 p-6 sm:p-8 backdrop-blur-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 sm:p-8 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
           <div className="flex items-center gap-2">
-            <Cpu className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">{t.title}</h2>
+            <Cpu className="w-5 h-5 text-[#00DC6D]" />
+            <h2 className="text-lg font-bold text-[#F4F4F6]">{t.title}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
+          <p className="text-xs text-white/60 mt-1">
             {t.subtitlePrefix}{' '}
-            <span className="text-emerald-300 font-mono">rust-core</span>{' '}
+            <span className="text-[#00DC6D] font-mono">rust-core</span>{' '}
             {t.subtitleMid}{' '}
-            <span className="text-amber-300 font-mono">programs/usdfirm_escrow</span>{' '}
+            <span className="text-[#FCD34D] font-mono">programs/usdfirm_escrow</span>{' '}
             {t.subtitleEnd}
           </p>
         </div>
-        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono text-amber-300">
+        <span className="rounded-full bg-[#D4A853]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#FCD34D]">
           {t.specBadge}
         </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-2">
+        <div className="sm-bento-emerald rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-mono font-bold text-emerald-400 flex items-center gap-1.5">
+            <span className="font-mono font-bold text-[#00DC6D] flex items-center gap-1.5">
               <Terminal className="w-3.5 h-3.5" />
               rust-core/src/lib.rs & merkle_por.rs
             </span>
-            <span className="rounded bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] text-emerald-300">
+            <span className="rounded-full bg-[#090A0F]/45 px-2.5 py-0.5 font-mono text-[10px] text-[#6EE7B7]">
               {t.offchainBadge}
             </span>
           </div>
-          <p className="text-xs text-zinc-300">
-            {t.offchainDesc1} <code className="text-amber-300">u128</code>{' '}
+          <p className="text-xs text-white/80 leading-relaxed">
+            {t.offchainDesc1} <code className="text-[#FCD34D]">u128</code>{' '}
             {t.offchainDesc2}
-            <code className="text-emerald-300">checked_add / checked_sub</code>
+            <code className="text-[#6EE7B7]">checked_add / checked_sub</code>
             {t.offchainDesc3}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-2">
+        <div className="sm-bento-amber rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-mono font-bold text-amber-400 flex items-center gap-1.5">
+            <span className="font-mono font-bold text-[#FCD34D] flex items-center gap-1.5">
               <GitBranch className="w-3.5 h-3.5" />
               programs/usdfirm_escrow/src/lib.rs
             </span>
-            <span className="rounded bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] text-amber-300">
+            <span className="rounded-full bg-[#090A0F]/45 px-2.5 py-0.5 font-mono text-[10px] text-[#FCD34D]">
               {t.onchainBadge}
             </span>
           </div>
-          <p className="text-xs text-zinc-300">
-            {t.onchainDesc1} <code className="text-emerald-300">mint_usdf_stable</code>{' '}
+          <p className="text-xs text-white/80 leading-relaxed">
+            {t.onchainDesc1} <code className="text-[#6EE7B7]">mint_usdf_stable</code>{' '}
             {t.onchainDesc2}{' '}
-            <code className="text-cyan-300">commit_state_channel_rollup</code>{' '}
+            <code className="text-[#67E8F9]">commit_state_channel_rollup</code>{' '}
             {t.onchainDesc3}{' '}
-            <code className="text-purple-300">settle_four_flow_escrow</code>{' '}
+            <code className="text-[#D8B4FE]">settle_four_flow_escrow</code>{' '}
             {t.onchainDesc4}
           </p>
         </div>
@@ -129,22 +129,22 @@ export function RustChainCorePanel({ accounts }: RustChainCorePanelProps) {
       <form
         onSubmit={handleVerifyMerkle}
         noValidate
-        className="rounded-2xl border border-white/10 bg-zinc-950/80 p-5 space-y-4"
+        className="rounded-2xl bg-[#24262C] p-5 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-white">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+          <div className="flex items-center gap-2 text-xs font-semibold text-[#F4F4F6]">
+            <ShieldCheck className="w-4 h-4 text-[#00DC6D]" />
             <span>{t.verifyTitle}</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={targetSite}
               onChange={(e) => setTargetSite(e.target.value)}
               aria-label={t.selectAria}
-              className="rounded-xl border border-white/10 bg-zinc-900 px-3 py-1.5 text-xs text-white font-mono"
+              className="rounded-full bg-white/[0.075] focus:bg-white/[0.12] px-3.5 py-2 text-xs text-[#F4F4F6] font-mono focus:outline-none"
             >
               {accounts.map((a) => (
-                <option key={a.id} value={a.ownerSite}>
+                <option key={a.id} value={a.ownerSite} className="bg-[#18191C] text-white">
                   {a.ownerSite} ({a.id})
                 </option>
               ))}
@@ -152,7 +152,7 @@ export function RustChainCorePanel({ accounts }: RustChainCorePanelProps) {
             <button
               type="submit"
               disabled={status === 'LOADING'}
-              className="rounded-xl bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition"
+              className="rounded-full bg-[#00DC6D] px-4 py-2 text-xs font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
             >
               {status === 'LOADING' ? t.computingBtn : t.generateBtn}
             </button>
@@ -160,20 +160,20 @@ export function RustChainCorePanel({ accounts }: RustChainCorePanelProps) {
         </div>
 
         {status === 'LOADING' && (
-          <div className="text-xs text-amber-300 flex items-center gap-1.5">
+          <div className="text-xs text-[#FCD34D] flex items-center gap-1.5">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
             {t.loadingMsg}
           </div>
         )}
 
         {status === 'ERROR' && (
-          <div className="text-xs text-rose-400 flex items-center justify-between gap-2">
+          <div className="sm-bento-rose rounded-xl p-3 text-xs text-[#FDA4AF] flex items-center justify-between gap-2">
             <span className="flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               {errorMsg}
             </span>
             {errorCode && (
-              <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+              <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
                 {errorCode}
               </code>
             )}
@@ -181,33 +181,33 @@ export function RustChainCorePanel({ accounts }: RustChainCorePanelProps) {
         )}
 
         {status === 'SUCCESS' && result && (
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 space-y-2.5 text-xs font-mono">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-emerald-300 font-sans font-semibold">
+          <div className="sm-bento-emerald rounded-2xl p-4 space-y-2.5 text-xs font-mono">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[#6EE7B7] font-sans font-semibold">
               <span className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-4 h-4 text-[#00DC6D]" />
                 {t.verifiedTitlePrefix} ({String(result.proof.verified)}) · {t.slotHeightPrefix}
                 {result.chainStatus.slotHeight}
               </span>
-              <span className="text-[11px] text-amber-300 font-mono">
+              <span className="text-[11px] text-[#FCD34D] font-mono">
                 {t.u128Prefix} {result.chainStatus.u128InvariantOk ? 'OK' : 'BROKEN'}
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-              <div className="rounded-lg bg-zinc-950/90 p-2.5 border border-white/10">
-                <span className="text-zinc-400 block">{t.leafPayloadLabel}</span>
-                <span className="text-white break-all">{result.proof.leafPayload}</span>
+              <div className="rounded-xl bg-[#090A0F]/45 p-2.5">
+                <span className="text-white/60 block">{t.leafPayloadLabel}</span>
+                <span className="text-[#F4F4F6] break-all">{result.proof.leafPayload}</span>
               </div>
-              <div className="rounded-lg bg-zinc-950/90 p-2.5 border border-white/10">
-                <span className="text-zinc-400 block">{t.leafHashLabel}</span>
-                <span className="text-cyan-300 break-all">{result.proof.leafHash}</span>
+              <div className="rounded-xl bg-[#090A0F]/45 p-2.5">
+                <span className="text-white/60 block">{t.leafHashLabel}</span>
+                <span className="text-[#67E8F9] break-all">{result.proof.leafHash}</span>
               </div>
-              <div className="rounded-lg bg-zinc-950/90 p-2.5 border border-white/10">
-                <span className="text-zinc-400 block">{t.stateRootLabel}</span>
-                <span className="text-emerald-400 break-all">{result.proof.merkleRoot}</span>
+              <div className="rounded-xl bg-[#090A0F]/45 p-2.5">
+                <span className="text-white/60 block">{t.stateRootLabel}</span>
+                <span className="text-[#00DC6D] break-all">{result.proof.merkleRoot}</span>
               </div>
-              <div className="rounded-lg bg-zinc-950/90 p-2.5 border border-white/10">
-                <span className="text-zinc-400 block">{t.blockHashLabel}</span>
-                <span className="text-amber-300 break-all">{result.chainStatus.latestBlockHash}</span>
+              <div className="rounded-xl bg-[#090A0F]/45 p-2.5">
+                <span className="text-white/60 block">{t.blockHashLabel}</span>
+                <span className="text-[#FCD34D] break-all">{result.chainStatus.latestBlockHash}</span>
               </div>
             </div>
           </div>

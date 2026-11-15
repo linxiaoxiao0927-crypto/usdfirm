@@ -149,80 +149,80 @@ export function BridgeStatusPanel({
   const xpayesPool = buffers.find((b) => b.module_id === 'xpayes');
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-xl shadow-2xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Network className="w-5 h-5 text-emerald-400" />
+          <h3 className="text-lg font-bold text-[#F4F4F6] flex items-center gap-2">
+            <Network className="w-5 h-5 text-[#00DC6D]" />
             {t.title}
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">{t.subtitle}</p>
+          <p className="text-xs text-white/60 mt-0.5">{t.subtitle}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/15 px-3 py-1 text-xs font-mono text-emerald-300">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#00DC6D]">
           <Shield className="w-3.5 h-3.5" />
           {t.firewallBadge}
         </span>
       </div>
 
       {/* Live $20M Segregated Market-Maker Buffer Gauge */}
-      <div className="rounded-2xl border border-amber-500/30 bg-[#090A0F]/95 p-5 space-y-4">
+      <div className="sm-bento-amber rounded-2xl p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <Gauge className="w-4 h-4 text-amber-400" />
-              <h4 className="text-sm font-bold text-white">{t.gaugeTitle}</h4>
+              <Gauge className="w-4 h-4 text-[#FCD34D]" />
+              <h4 className="text-sm font-bold text-[#F4F4F6]">{t.gaugeTitle}</h4>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">{t.gaugeSubtitle}</p>
+            <p className="text-xs text-white/70 mt-0.5">{t.gaugeSubtitle}</p>
           </div>
-          <span className="rounded-full border border-amber-500/40 bg-amber-500/15 px-3 py-1 text-xs font-mono font-bold text-amber-300">
+          <span className="rounded-full bg-[#090A0F]/50 px-3.5 py-1 text-xs font-mono font-bold text-[#FCD34D]">
             {t.utilizationLabel}: {utilizationPct.toFixed(2)}%
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <span className="block text-[11px] font-sans text-zinc-400">{t.allocatedLabel}</span>
-            <span className="text-lg font-bold text-amber-300">
+          <div className="rounded-xl bg-[#090A0F]/45 p-3.5">
+            <span className="block text-[11px] font-sans text-white/60">{t.allocatedLabel}</span>
+            <span className="text-lg font-bold text-[#FCD34D]">
               ${allocatedUsdf.toLocaleString()} USDF
             </span>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <span className="block text-[11px] font-sans text-zinc-400">{t.remainingLabel}</span>
-            <span className="text-lg font-bold text-emerald-400">
+          <div className="rounded-xl bg-[#090A0F]/45 p-3.5">
+            <span className="block text-[11px] font-sans text-white/60">{t.remainingLabel}</span>
+            <span className="text-lg font-bold text-[#00DC6D]">
               ${bufferRemaining.toLocaleString()} USDF
             </span>
           </div>
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <span className="block text-[11px] font-sans text-zinc-400">{t.capLabel}</span>
-            <span className="text-lg font-bold text-white">${maxCap.toLocaleString()} USDF</span>
+          <div className="rounded-xl bg-[#090A0F]/45 p-3.5">
+            <span className="block text-[11px] font-sans text-white/60">{t.capLabel}</span>
+            <span className="text-lg font-bold text-[#F4F4F6]">${maxCap.toLocaleString()} USDF</span>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <div className="h-3 w-full rounded-full bg-zinc-800 border border-white/10 overflow-hidden">
+          <div className="h-3 w-full rounded-full bg-[#090A0F]/60 overflow-hidden">
             <div
               className={`h-full transition-all duration-500 ${
                 utilizationPct >= 90
-                  ? 'bg-rose-500'
+                  ? 'bg-[#F87171]'
                   : utilizationPct >= 75
-                    ? 'bg-amber-400'
-                    : 'bg-gradient-to-r from-emerald-500 to-amber-400'
+                    ? 'bg-[#FCD34D]'
+                    : 'bg-gradient-to-r from-[#00DC6D] to-[#FCD34D]'
               }`}
               style={{ width: `${utilizationPct}%` }}
             />
           </div>
           {xpayesPool && (
-            <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-zinc-400">
+            <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-white/70">
               <span>
                 {t.xpayesPoolLabel}{' '}
-                <strong className="text-emerald-300">
+                <strong className="text-[#6EE7B7]">
                   ${Number(xpayesPool.allocated_usdf).toLocaleString()} / $
                   {Number(xpayesPool.max_cap_usdf).toLocaleString()} USDF
                 </strong>
               </span>
               <span>
                 {t.segregatedLabel}:{' '}
-                <strong className={buffer.isSegregated ? 'text-emerald-300' : 'text-rose-400'}>
+                <strong className={buffer.isSegregated ? 'text-[#00DC6D]' : 'text-[#FDA4AF]'}>
                   {buffer.isSegregated ? t.segregatedYes : t.segregatedNo}
                 </strong>
               </span>
@@ -232,15 +232,15 @@ export function BridgeStatusPanel({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-3 flex flex-col justify-between">
-          <div className="space-y-1">
+        <div className="rounded-2xl bg-[#24262C] p-5 space-y-3 flex flex-col justify-between">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-sm">{t.xpayesTitle}</span>
-              <span className="rounded bg-emerald-500/15 px-2 py-0.5 font-mono text-[10px] text-emerald-300">
+              <span className="font-bold text-[#F4F4F6] text-sm">{t.xpayesTitle}</span>
+              <span className="rounded-full bg-[#00DC6D]/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#00DC6D]">
                 {t.xpayesTag}
               </span>
             </div>
-            <p className="text-zinc-400">{t.xpayesDesc}</p>
+            <p className="text-white/60 leading-relaxed">{t.xpayesDesc}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-2">
@@ -248,7 +248,7 @@ export function BridgeStatusPanel({
               type="button"
               disabled={busy === 'XPAYES'}
               onClick={() => runXPayesSettlement(false)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-1.5 font-bold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D] px-3.5 py-2 font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
             >
               <ArrowLeftRight className="w-3.5 h-3.5" />
               {t.xpayesValidBtn}
@@ -257,23 +257,23 @@ export function BridgeStatusPanel({
               type="button"
               disabled={busy === 'XPAYES'}
               onClick={() => runXPayesSettlement(true)}
-              className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-rose-300 hover:bg-rose-500/20 transition"
+              className="rounded-full bg-[#F87171]/15 px-3.5 py-2 font-semibold text-[#FDA4AF] hover:bg-[#F87171]/25 transition"
             >
               {t.xpayesBadBtn}
             </button>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-3 flex flex-col justify-between">
+        <div className="rounded-2xl bg-[#24262C] p-5 space-y-3 flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-sm">{t.segregatedMmTitle}</span>
-              <span className="rounded bg-amber-500/15 px-2 py-0.5 font-mono text-[10px] text-amber-300">
+              <span className="font-bold text-[#F4F4F6] text-sm">{t.segregatedMmTitle}</span>
+              <span className="rounded-full bg-[#D4A853]/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-[#FCD34D]">
                 ${(maxCap / 1_000_000).toFixed(0)}
                 {t.capTagSuffix}
               </span>
             </div>
-            <p className="text-zinc-400">{t.segregatedMmDesc}</p>
+            <p className="text-white/60 leading-relaxed">{t.segregatedMmDesc}</p>
           </div>
 
           <div className="flex flex-wrap gap-2 pt-1">
@@ -281,7 +281,7 @@ export function BridgeStatusPanel({
               type="button"
               disabled={busy === 'SEGREGATED_MM'}
               onClick={() => runSegregatedMmLiquidity('MINT_LIQUIDITY', 500_000)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-1.5 font-bold text-zinc-950 hover:bg-amber-400 disabled:opacity-50 transition"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#D4A853] px-3.5 py-2 font-bold text-[#090A0F] hover:bg-[#FCD34D] disabled:opacity-50 transition"
             >
               {t.segregatedMmBridgeBtn}
             </button>
@@ -289,7 +289,7 @@ export function BridgeStatusPanel({
               type="button"
               disabled={busy === 'SEGREGATED_MM'}
               onClick={() => runSegregatedMmLiquidity('BURN_REDEEM', 250_000)}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-zinc-300 hover:bg-white/10 transition"
+              className="rounded-full bg-white/[0.08] px-3.5 py-2 font-semibold text-white/80 hover:bg-white/[0.14] transition"
             >
               {t.segregatedMmRedeemBtn}
             </button>
@@ -298,14 +298,14 @@ export function BridgeStatusPanel({
       </div>
 
       {xpayesResult && (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-3 text-xs font-mono text-emerald-300 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+        <div className="sm-bento-emerald rounded-2xl p-3.5 text-xs font-mono text-[#6EE7B7] flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-[#00DC6D]" />
           <span>{xpayesResult}</span>
         </div>
       )}
 
       {mmResult && (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-3 text-xs font-mono text-amber-300 flex items-center gap-2">
+        <div className="sm-bento-amber rounded-2xl p-3.5 text-xs font-mono text-[#FCD34D] flex items-center gap-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
           <span>{mmResult}</span>
         </div>
@@ -314,13 +314,13 @@ export function BridgeStatusPanel({
       {bridgeError && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-3 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-3.5 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertOctagon className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertOctagon className="w-4 h-4 shrink-0" />
             <span>{bridgeError.text}</span>
           </span>
-          <code className="shrink-0 rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="shrink-0 rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {bridgeError.code}
           </code>
         </div>

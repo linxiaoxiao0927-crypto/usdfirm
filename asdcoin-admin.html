@@ -2,10 +2,82 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>asdcoin-admin · ASDCoin 生态权益与治理通证 管理后台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>usdfirm-admin · USDFirm 稳定币协议与储备金证明 管理后台</title>
   <meta http-equiv="refresh" content="0; url=http://localhost:3001/?admin=asdcoin-admin&view=matrix_admin_union" />
+  <style>
+    :root {
+      color-scheme: dark;
+      --sm-bg-root: #090A0F;
+      --sm-bg-stage: #111215;
+      --sm-block-1: #1C1D21;
+      --sm-accent: #00DC6D;
+      --sm-accent-hover: #19E67C;
+    }
+    * { box-sizing: border-box; border: none; }
+    html, body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--sm-bg-stage);
+      color: #F4F4F6;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .admin-card {
+      max-width: 480px;
+      width: 100%;
+      background: linear-gradient(135deg, #16342A 0%, #10201B 100%);
+      border-radius: 24px;
+      padding: 32px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      background: rgba(0, 220, 109, 0.15);
+      color: var(--sm-accent);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+    p {
+      margin: 0 0 22px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.6;
+    }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 24px;
+      border-radius: 9999px;
+      background: var(--sm-accent);
+      color: #090A0F;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 0.18s ease;
+    }
+    .cta:hover { background: var(--sm-accent-hover); }
+  </style>
 </head>
-<body style="background:#090A0F;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
-  <a href="http://localhost:3001/?admin=asdcoin-admin&view=matrix_admin_union" style="color:#10B981;">正在进入 asdcoin-admin (ASDCoin 生态权益与治理通证) 统一管理后台...</a>
+<body>
+  <div class="admin-card">
+    <span class="badge">USDFIRM · EMERALD MATRIX</span>
+    <h1>正在进入 USDFirm 稳定币协议统一管理后台</h1>
+    <p>3-of-5 多签财资池、实时 PoR 储备证明与隔离流动性桥控制台正在跳转...</p>
+    <a class="cta" href="http://localhost:3001/?admin=asdcoin-admin&view=matrix_admin_union">立即进入控制台</a>
+  </div>
 </body>
 </html>

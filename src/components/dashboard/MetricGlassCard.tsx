@@ -11,27 +11,27 @@ export interface MetricGlassCardProps {
 
 const ACCENT_MAP: Record<
   MetricGlassCardProps['accent'],
-  { badge: string; glow: string; text: string }
+  { bento: string; badge: string; text: string }
 > = {
   emerald: {
-    badge: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-    glow: 'from-emerald-500/10 via-transparent to-transparent',
-    text: 'text-emerald-400',
+    bento: 'sm-bento-emerald',
+    badge: 'bg-[#00DC6D]/15 text-[#00DC6D]',
+    text: 'text-[#00DC6D]',
   },
   amber: {
-    badge: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-    glow: 'from-amber-500/10 via-transparent to-transparent',
-    text: 'text-amber-400',
+    bento: 'sm-bento-amber',
+    badge: 'bg-[#D4A853]/20 text-[#FCD34D]',
+    text: 'text-[#FCD34D]',
   },
   cyan: {
-    badge: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-    glow: 'from-cyan-500/10 via-transparent to-transparent',
-    text: 'text-cyan-400',
+    bento: 'sm-bento-teal',
+    badge: 'bg-[#2DD4BF]/15 text-[#67E8F9]',
+    text: 'text-[#67E8F9]',
   },
   purple: {
-    badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
-    glow: 'from-purple-500/10 via-transparent to-transparent',
-    text: 'text-purple-400',
+    bento: 'sm-bento-plum',
+    badge: 'bg-[#D8B4FE]/15 text-[#D8B4FE]',
+    text: 'text-[#D8B4FE]',
   },
 };
 
@@ -46,20 +46,19 @@ export function MetricGlassCard({
   const style = ACCENT_MAP[accent];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/75 p-6 backdrop-blur-xl shadow-xl transition hover:border-white/20">
-      <div
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${style.glow}`}
-      />
+    <div
+      className={`relative overflow-hidden rounded-2xl p-5 transition ${style.bento}`}
+    >
       <div className="relative z-10 flex flex-col justify-between h-full space-y-4">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-400">
+            <p className="text-xs font-medium uppercase tracking-wider text-white/75">
               {title}
             </p>
-            <p className="text-[11px] text-zinc-500 mt-0.5">{subtitle}</p>
+            <p className="text-[11px] text-white/50 mt-0.5">{subtitle}</p>
           </div>
           <span
-            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${style.badge}`}
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold shrink-0 ${style.badge}`}
           >
             {badgeText}
           </span>

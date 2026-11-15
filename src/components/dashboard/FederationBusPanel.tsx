@@ -110,16 +110,16 @@ export function FederationBusPanel({
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/75 p-6 sm:p-8 backdrop-blur-xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="sm-card rounded-3xl bg-[#1C1D21] p-6 sm:p-8 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Network className="w-5 h-5 text-emerald-400" />
+            <Network className="w-5 h-5 text-[#00DC6D]" />
             <h2 className="text-lg font-bold text-white">{t.title}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">{t.subtitle}</p>
+          <p className="text-xs text-white/55 mt-1">{t.subtitle}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono text-emerald-300">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#00DC6D]">
           <Radio className="w-3.5 h-3.5 animate-pulse" />
           {t.onlineBadgePrefix} {nodes.length}
         </span>
@@ -131,10 +131,10 @@ export function FederationBusPanel({
             key={key}
             type="button"
             onClick={() => setClusterFilter(key)}
-            className={`rounded-xl border px-3 py-1.5 text-xs font-medium transition ${
+            className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition ${
               clusterFilter === key
-                ? 'border-emerald-500/50 bg-emerald-500/20 text-emerald-200'
-                : 'border-white/10 bg-white/5 text-zinc-400 hover:text-white'
+                ? 'bg-white text-[#090A0F] font-semibold'
+                : 'bg-white/[0.055] text-white/70 hover:text-white'
             }`}
           >
             {t.clusters[key]}
@@ -143,7 +143,7 @@ export function FederationBusPanel({
       </div>
 
       {filteredNodes.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-6 text-center text-xs text-white/50">
           {t.emptyNodes}
         </div>
       ) : (
@@ -158,19 +158,19 @@ export function FederationBusPanel({
             return (
               <div
                 key={node.domain}
-                className="rounded-2xl border border-white/10 bg-zinc-950/75 p-4 space-y-1.5 hover:border-white/25 transition"
+                className="rounded-2xl bg-[#24262C] hover:bg-[#26272B] p-4 space-y-1.5 transition"
               >
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-mono font-bold text-white">{node.domain}</span>
-                  <span className="rounded bg-emerald-500/15 px-1.5 py-0.5 font-mono text-[10px] text-emerald-300">
+                  <span className="rounded-full bg-[#00DC6D]/15 px-2 py-0.5 font-mono text-[10px] text-[#00DC6D]">
                     {node.latencyMs}ms
                   </span>
                 </div>
-                <p className="text-xs font-semibold text-amber-300">{displayName}</p>
-                <p className="text-[11px] text-zinc-400 line-clamp-2">{displayRole}</p>
-                <div className="pt-1.5 border-t border-white/10 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                <p className="text-xs font-semibold text-[#FCD34D]">{displayName}</p>
+                <p className="text-[11px] text-white/60 line-clamp-2">{displayRole}</p>
+                <div className="rounded-lg bg-[#1C1D21] px-2.5 py-1 flex items-center justify-between text-[10px] font-mono text-white/60">
                   <span>24h: ${node.volume24hAsdS.toLocaleString()}</span>
-                  <span className="text-cyan-300">{node.protocolType}</span>
+                  <span className="text-[#67E8F9]">{node.protocolType}</span>
                 </div>
               </div>
             );
@@ -181,14 +181,14 @@ export function FederationBusPanel({
       <form
         onSubmit={handleDispatchEvent}
         noValidate
-        className="rounded-2xl border border-white/10 bg-zinc-950/80 p-5 space-y-4"
+        className="rounded-2xl bg-[#24262C] p-5 space-y-4"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-semibold text-white flex items-center gap-1.5">
-            <Zap className="w-4 h-4 text-amber-400" />
+            <Zap className="w-4 h-4 text-[#FCD34D]" />
             {t.simTitle}
           </span>
-          <label className="inline-flex items-center gap-2 text-xs text-rose-300 cursor-pointer">
+          <label className="inline-flex items-center gap-2 text-xs text-[#FDA4AF] cursor-pointer">
             <input
               type="checkbox"
               checked={tamperHmac}
@@ -201,16 +201,16 @@ export function FederationBusPanel({
 
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">{t.sourceLabel}</label>
-            <select value={sourceSite} onChange={(e) => setSourceSite(e.target.value)} className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white">
+            <label className="block text-[11px] text-white/55 mb-1">{t.sourceLabel}</label>
+            <select value={sourceSite} onChange={(e) => setSourceSite(e.target.value)} className="w-full rounded-2xl bg-[#1C1D21] px-3 py-2 text-xs text-white focus:outline-none">
               <option value="sofayes.com">{t.sourceSofayes}</option>
               <option value="hmm.sale">{t.sourceHmm}</option>
               <option value="dezi.life">{t.sourceDezi}</option>
             </select>
           </div>
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">{t.targetLabel}</label>
-            <select value={targetSite} onChange={(e) => setTargetSite(e.target.value)} className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white">
+            <label className="block text-[11px] text-white/55 mb-1">{t.targetLabel}</label>
+            <select value={targetSite} onChange={(e) => setTargetSite(e.target.value)} className="w-full rounded-2xl bg-[#1C1D21] px-3 py-2 text-xs text-white focus:outline-none">
               <option value="idles.site">{t.targetIdles}</option>
               <option value="taxyesai.com">{t.targetTaxyes}</option>
               <option value="uptoyes.com">{t.targetUptoyes}</option>
@@ -219,8 +219,8 @@ export function FederationBusPanel({
             </select>
           </div>
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">{t.protocolLabel}</label>
-            <select value={eventType} onChange={(e) => setEventType(e.target.value as typeof eventType)} className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white">
+            <label className="block text-[11px] text-white/55 mb-1">{t.protocolLabel}</label>
+            <select value={eventType} onChange={(e) => setEventType(e.target.value as typeof eventType)} className="w-full rounded-2xl bg-[#1C1D21] px-3 py-2 text-xs text-white focus:outline-none">
               <option value="COMPUTE_LEASE_PAYOUT">{t.evCompute}</option>
               <option value="CROSS_MALL_ORDER_LOCK">{t.evMall}</option>
               <option value="TAX_ROUTE_REBATE">{t.evTax}</option>
@@ -228,40 +228,40 @@ export function FederationBusPanel({
             </select>
           </div>
           <div>
-            <label className="block text-[11px] text-zinc-400 mb-1">{t.amountLabel}</label>
-            <input type="number" value={amountAsdS} onChange={(e) => setAmountAsdS(e.target.value)} className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs font-mono text-white" />
+            <label className="block text-[11px] text-white/55 mb-1">{t.amountLabel}</label>
+            <input type="number" value={amountAsdS} onChange={(e) => setAmountAsdS(e.target.value)} className="w-full rounded-2xl bg-white/[0.075] focus:bg-white/[0.12] px-3 py-2 text-xs font-mono text-white focus:outline-none transition" />
           </div>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
           <div className="text-xs flex items-center gap-2">
             {status === 'LOADING' && (
-              <span className="inline-flex items-center gap-1.5 text-amber-300">
+              <span className="inline-flex items-center gap-1.5 text-[#FCD34D]">
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 {t.loadingMsg}
               </span>
             )}
             {status === 'ERROR' && (
               <>
-                <span className="inline-flex items-center gap-1.5 text-rose-400">
+                <span className="inline-flex items-center gap-1.5 text-[#FDA4AF]">
                   <ShieldAlert className="w-4 h-4 shrink-0" />
                   {feedback}
                 </span>
                 {errorCode && (
-                  <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                  <code className="rounded-lg bg-black/30 px-2 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
                     {errorCode}
                   </code>
                 )}
               </>
             )}
             {status === 'SUCCESS' && (
-              <span className="inline-flex items-center gap-1.5 text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 text-[#00DC6D]">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 {feedback}
               </span>
             )}
           </div>
-          <button type="submit" disabled={status === 'LOADING'} className="rounded-xl bg-emerald-500 px-4 py-2 text-xs font-semibold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition">
+          <button type="submit" disabled={status === 'LOADING'} className="rounded-full bg-[#00DC6D] hover:bg-[#19E67C] px-5 py-2 text-xs font-bold text-[#090A0F] disabled:opacity-50 transition">
             {t.submitBtn}
           </button>
         </div>

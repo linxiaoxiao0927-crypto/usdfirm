@@ -123,49 +123,49 @@ export function MultiSigTimelockPanel({
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-xl shadow-2xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-amber-400" />
+          <h3 className="text-lg font-bold text-[#F4F4F6] flex items-center gap-2">
+            <KeyRound className="w-5 h-5 text-[#FCD34D]" />
             {t.title} ({requiredConfirmations}-of-{signers.length})
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">{t.subtitle}</p>
+          <p className="text-xs text-white/60 mt-0.5">{t.subtitle}</p>
         </div>
-        <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-mono text-amber-300">
+        <span className="rounded-full bg-[#D4A853]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#FCD34D]">
           {t.minDelayBadge}
         </span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-        <label className="space-y-1">
-          <span className="text-zinc-400 font-medium">{t.activeSigner}</span>
+        <label className="space-y-1.5">
+          <span className="text-white/60 font-medium">{t.activeSigner}</span>
           <select
             value={selectedSigner}
             onChange={(e) => setSelectedSigner(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-emerald-300 focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#00DC6D] focus:outline-none"
           >
             {signers.map((s, idx) => (
-              <option key={s} value={s}>
+              <option key={s} value={s} className="bg-[#18191C] text-white">
                 #{idx + 1}: {s.length > 22 ? `${s.slice(0, 10)}...${s.slice(-6)}` : s}
               </option>
             ))}
           </select>
         </label>
 
-        <form onSubmit={handlePropose} noValidate className="space-y-1">
-          <span className="text-zinc-400 font-medium">{t.queueAction}</span>
+        <form onSubmit={handlePropose} noValidate className="space-y-1.5">
+          <span className="text-white/60 font-medium">{t.queueAction}</span>
           <div className="flex gap-2">
             <input
               type="text"
               value={newAction}
               onChange={(e) => setNewAction(e.target.value)}
-              className="flex-1 min-w-0 rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+              className="flex-1 min-w-0 rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
             />
             <button
               type="submit"
               disabled={busyId === 'PROPOSE'}
-              className="shrink-0 inline-flex items-center gap-1 rounded-xl bg-amber-500 px-3 py-2 font-bold text-zinc-950 hover:bg-amber-400 disabled:opacity-50 transition"
+              className="shrink-0 inline-flex items-center gap-1 rounded-full bg-[#D4A853] px-3.5 py-2 font-bold text-[#090A0F] hover:bg-[#FCD34D] disabled:opacity-50 transition"
             >
               <PlusCircle className="w-3.5 h-3.5" />
               {t.queueBtn}
@@ -177,20 +177,20 @@ export function MultiSigTimelockPanel({
       {errorInfo && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-3 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-3.5 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorInfo.text}</span>
           </span>
-          <code className="shrink-0 rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="shrink-0 rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorInfo.code}
           </code>
         </div>
       )}
 
       {proposals.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-6 text-center text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-6 text-center text-xs text-white/60">
           {t.emptyProposals}
         </div>
       ) : (
@@ -212,47 +212,48 @@ export function MultiSigTimelockPanel({
             return (
               <div
                 key={prop.proposalId}
-                className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-2.5 text-xs"
+                className="rounded-2xl bg-[#24262C] hover:bg-[#26272B] transition p-4 space-y-2.5 text-xs"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-mono">
-                    <span className="text-amber-300 font-bold">{prop.proposalId}</span>
+                    <span className="text-[#FCD34D] font-bold">{prop.proposalId}</span>
                     <span
-                      className={`rounded px-2 py-0.5 text-[10px] ${
+                      className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${
                         isExecuted
-                          ? 'bg-emerald-500/15 text-emerald-300'
+                          ? 'bg-[#00DC6D]/15 text-[#00DC6D]'
                           : hasQuorum
-                            ? 'bg-cyan-500/15 text-cyan-300'
-                            : 'bg-white/10 text-zinc-300'
+                            ? 'bg-[#67E8F9]/15 text-[#67E8F9]'
+                            : 'bg-white/[0.08] text-white/75'
                       }`}
                     >
                       {statusLabel}
                     </span>
                   </div>
-                  <span className="font-mono text-zinc-400">
+                  <span className="font-mono text-white/60">
                     {t.confirmations}{' '}
-                    <strong className="text-white">
+                    <strong className="text-[#F4F4F6]">
                       {prop.confirmCount}/{prop.requiredConfirmations}
                     </strong>
                   </span>
                 </div>
 
-                <p className="text-white text-xs break-words">{title}</p>
+                <p className="text-[#F4F4F6] text-xs break-words">{title}</p>
 
                 <div className="flex flex-wrap gap-1.5">
                   {prop.signers.map((sig) => (
                     <span
                       key={sig}
-                      className="rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] text-emerald-300"
+                      className="rounded-full bg-[#00DC6D]/15 px-2.5 py-0.5 font-mono text-[10px] text-[#00DC6D]"
                     >
                       {sig.length > 18 ? `${sig.slice(0, 8)}...` : sig}
                     </span>
                   ))}
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10">
-                  <span className="text-[11px] font-mono text-zinc-400">
-                    {t.etaLabel}: {new Date(prop.eta).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5">
+                  <span className="text-[11px] font-mono text-white/50">
+                    {t.etaLabel}:{' '}
+                    {new Date(prop.eta).toLocaleString(locale === 'zh' ? 'zh-CN' : 'en-US')} (
                     {isReadyTime ? t.unlocked : t.timelocked})
                   </span>
 
@@ -262,7 +263,7 @@ export function MultiSigTimelockPanel({
                         type="button"
                         onClick={() => handleAction(prop.proposalId, 'CONFIRM')}
                         disabled={busyId === `CONFIRM_${prop.proposalId}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-2.5 py-1 text-emerald-300 hover:bg-emerald-500/25 font-medium transition"
+                        className="inline-flex items-center gap-1 rounded-full bg-[#00DC6D]/15 px-3 py-1 text-[#00DC6D] hover:bg-[#00DC6D]/25 font-semibold transition"
                       >
                         <Check className="w-3.5 h-3.5" />
                         {t.signBtn} ({selectedSigner.slice(0, 10)})
@@ -271,10 +272,10 @@ export function MultiSigTimelockPanel({
                         type="button"
                         onClick={() => handleAction(prop.proposalId, 'EXECUTE')}
                         disabled={busyId === `EXECUTE_${prop.proposalId}`}
-                        className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 font-semibold transition ${
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1 font-bold transition ${
                           hasQuorum && isReadyTime
-                            ? 'bg-emerald-500 text-zinc-950 hover:bg-emerald-400'
-                            : 'border border-white/10 bg-white/5 text-zinc-400 hover:bg-white/10'
+                            ? 'bg-[#00DC6D] text-[#090A0F] hover:bg-[#19E67C]'
+                            : 'bg-white/[0.08] text-white/65 hover:bg-white/[0.14]'
                         }`}
                       >
                         <Play className="w-3 h-3" />

@@ -135,18 +135,18 @@ export function FourFlowTracker({
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/75 p-6 sm:p-8 backdrop-blur-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="sm-card rounded-3xl bg-[#1C1D21] p-6 sm:p-8 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
-            <Workflow className="w-5 h-5 text-cyan-400" />
+            <Workflow className="w-5 h-5 text-[#67E8F9]" />
             <h2 className="text-lg font-bold text-white">{t.title}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
-            {t.flowEntityPrefix} (<span className="text-emerald-400 font-mono">setupyes</span>) +{' '}
-            {t.flowTaxPrefix} (<span className="text-amber-400 font-mono">taxyesai</span>) +{' '}
-            {t.flowCapitalPrefix} (<span className="text-cyan-400 font-mono">xpayes</span>) +{' '}
-            {t.flowLogisticsPrefix} (<span className="text-purple-400 font-mono">uptoyes</span>)
+          <p className="text-xs text-white/55 mt-1">
+            {t.flowEntityPrefix} (<span className="text-[#00DC6D] font-mono">setupyes</span>) +{' '}
+            {t.flowTaxPrefix} (<span className="text-[#FCD34D] font-mono">taxyesai</span>) +{' '}
+            {t.flowCapitalPrefix} (<span className="text-[#67E8F9] font-mono">xpayes</span>) +{' '}
+            {t.flowLogisticsPrefix} (<span className="text-[#D8B4FE] font-mono">uptoyes</span>)
           </p>
         </div>
 
@@ -155,7 +155,7 @@ export function FourFlowTracker({
             value={newSite}
             onChange={(e) => setNewSite(e.target.value)}
             aria-label={t.siteSelectAria}
-            className="rounded-xl border border-white/10 bg-zinc-950 px-3 py-1.5 text-xs text-white"
+            className="rounded-full bg-[#24262C] px-3.5 py-1.5 text-xs text-white focus:outline-none"
           >
             <option value="hmm.sale">{t.siteOptions.hmm}</option>
             <option value="sheng.sale">{t.siteOptions.sheng}</option>
@@ -168,13 +168,13 @@ export function FourFlowTracker({
             value={newAmount}
             onChange={(e) => setNewAmount(e.target.value)}
             aria-label={t.amountAria}
-            className="w-24 rounded-xl border border-white/10 bg-zinc-950 px-2.5 py-1.5 text-xs font-mono text-white"
+            className="w-28 rounded-full bg-white/[0.075] focus:bg-white/[0.12] px-3.5 py-1.5 text-xs font-mono text-white focus:outline-none transition"
           />
           <button
             type="button"
             disabled={status === 'LOADING'}
             onClick={handleCreateOrder}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-zinc-950 hover:bg-cyan-400 disabled:opacity-50 transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D] hover:bg-[#19E67C] px-4 py-1.5 text-xs font-bold text-[#090A0F] disabled:opacity-50 transition"
           >
             <PlusCircle className="w-3.5 h-3.5" />
             {t.createBtn}
@@ -183,7 +183,7 @@ export function FourFlowTracker({
       </div>
 
       {escrows.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-6 text-center text-xs text-white/50">
           {t.emptyState}
         </div>
       ) : (
@@ -202,21 +202,21 @@ export function FourFlowTracker({
       )}
 
       {status !== 'IDLE' && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 px-4 py-3 text-xs flex items-center justify-between gap-2">
+        <div className="rounded-2xl bg-[#24262C] px-4 py-3 text-xs flex items-center justify-between gap-2">
           {status === 'SUCCESS' && (
-            <span className="text-emerald-400 flex items-center gap-1.5">
+            <span className="text-[#00DC6D] flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               {feedback}
             </span>
           )}
           {status === 'ERROR' && (
             <>
-              <span className="text-rose-400 flex items-center gap-1.5">
+              <span className="text-[#FDA4AF] flex items-center gap-1.5">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 {feedback}
               </span>
               {errorCode && (
-                <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+                <code className="rounded-lg bg-black/30 px-2 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
                   {errorCode}
                 </code>
               )}

@@ -104,29 +104,29 @@ export function MintBurnPanel({
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-xl shadow-2xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <h3 className="text-lg font-bold text-[#F4F4F6] flex items-center gap-2">
             {mode === 'MINT' ? (
-              <Coins className="w-5 h-5 text-emerald-400" />
+              <Coins className="w-5 h-5 text-[#00DC6D]" />
             ) : (
-              <Flame className="w-5 h-5 text-amber-400" />
+              <Flame className="w-5 h-5 text-[#FCD34D]" />
             )}
             {t.title}
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">{t.subtitle}</p>
+          <p className="text-xs text-white/60 mt-0.5">{t.subtitle}</p>
         </div>
 
-        <div className="flex rounded-xl border border-white/10 bg-zinc-950 p-1">
+        <div className="flex rounded-full bg-[#24262C] p-1">
           <button
             type="button"
             onClick={() => {
               setMode('MINT');
               setErrorInfo(null);
             }}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              mode === 'MINT' ? 'bg-emerald-500 text-zinc-950' : 'text-zinc-400 hover:text-white'
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+              mode === 'MINT' ? 'bg-[#00DC6D] text-[#090A0F]' : 'text-white/65 hover:text-[#F4F4F6]'
             }`}
           >
             {t.mintTab}
@@ -137,8 +137,8 @@ export function MintBurnPanel({
               setMode('BURN');
               setErrorInfo(null);
             }}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              mode === 'BURN' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-white'
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+              mode === 'BURN' ? 'bg-[#D4A853] text-[#090A0F]' : 'text-white/65 hover:text-[#F4F4F6]'
             }`}
           >
             {t.burnTab}
@@ -148,32 +148,32 @@ export function MintBurnPanel({
 
       <form onSubmit={handleSubmit} noValidate className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
         <label className="space-y-1.5">
-          <span className="text-zinc-400 font-medium">{t.partnerLabel}</span>
+          <span className="text-white/60 font-medium">{t.partnerLabel}</span>
           <select
             value={partnerSite}
             onChange={(e) => setPartnerSite(e.target.value as typeof partnerSite)}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 text-[#F4F4F6] focus:outline-none"
           >
-            <option value="xpayes.com">{t.partnerXpayes}</option>
-            <option value="usdfirm.com">{t.partnerUsdfirm}</option>
-            <option value="institutional_direct">{t.partnerDirect}</option>
+            <option value="xpayes.com" className="bg-[#18191C] text-white">{t.partnerXpayes}</option>
+            <option value="usdfirm.com" className="bg-[#18191C] text-white">{t.partnerUsdfirm}</option>
+            <option value="institutional_direct" className="bg-[#18191C] text-white">{t.partnerDirect}</option>
           </select>
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-zinc-400 font-medium">{t.reserveLabel}</span>
+          <span className="text-white/60 font-medium">{t.reserveLabel}</span>
           <select
             value={reserveId}
             onChange={(e) => setReserveId(e.target.value as typeof reserveId)}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
           >
-            <option value="RSV-CASH">{t.reserveCash}</option>
-            <option value="RSV-TBILL">{t.reserveTbill}</option>
+            <option value="RSV-CASH" className="bg-[#18191C] text-white">{t.reserveCash}</option>
+            <option value="RSV-TBILL" className="bg-[#18191C] text-white">{t.reserveTbill}</option>
           </select>
         </label>
 
         <label className="space-y-1.5">
-          <span className="text-zinc-400 font-medium">
+          <span className="text-white/60 font-medium">
             {mode === 'MINT' ? t.amountLabelMint : t.amountLabelBurn}
           </span>
           <input
@@ -182,39 +182,39 @@ export function MintBurnPanel({
             step="any"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
           />
         </label>
 
         {mode === 'MINT' ? (
           <label className="space-y-1.5">
-            <span className="text-zinc-400 font-medium">{t.refLabel}</span>
+            <span className="text-white/60 font-medium">{t.refLabel}</span>
             <input
               type="text"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
             />
           </label>
         ) : (
           <label className="space-y-1.5">
-            <span className="text-zinc-400 font-medium">{t.sigLabel}</span>
+            <span className="text-white/60 font-medium">{t.sigLabel}</span>
             <input
               type="text"
               value={burnSig}
               onChange={(e) => setBurnSig(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
             />
           </label>
         )}
 
         <label className="space-y-1.5 sm:col-span-2">
           <div className="flex items-center justify-between gap-2">
-            <span className="text-zinc-400 font-medium">{t.addressLabel}</span>
+            <span className="text-white/60 font-medium">{t.addressLabel}</span>
             <button
               type="button"
               onClick={() => setRequesterPubkey('0x7F367cc41522cE07553e846bc1068009752d4791')}
-              className="text-[11px] text-rose-400 hover:underline font-mono"
+              className="text-[11px] text-[#FDA4AF] hover:underline font-mono"
             >
               {t.testOfacBtn}
             </button>
@@ -223,7 +223,7 @@ export function MintBurnPanel({
             type="text"
             value={requesterPubkey}
             onChange={(e) => setRequesterPubkey(e.target.value)}
-            className="w-full rounded-xl border border-white/10 bg-zinc-950 px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"
+            className="w-full rounded-xl bg-[#24262C] focus:bg-[#26272B] px-3 py-2.5 font-mono text-[#F4F4F6] focus:outline-none"
           />
         </label>
 
@@ -232,14 +232,14 @@ export function MintBurnPanel({
             <button
               type="button"
               onClick={() => setAmount('250000')}
-              className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-zinc-300 hover:bg-white/10"
+              className="rounded-full bg-[#24262C] px-3 py-1.5 text-[11px] text-white/75 hover:bg-[#26272B] transition"
             >
               {t.presetInstant}
             </button>
             <button
               type="button"
               onClick={() => setAmount('2500000')}
-              className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-300 hover:bg-amber-500/20"
+              className="rounded-full bg-[#D4A853]/15 px-3 py-1.5 text-[11px] font-semibold text-[#FCD34D] hover:bg-[#D4A853]/25 transition"
             >
               {t.presetTimelock}
             </button>
@@ -247,7 +247,7 @@ export function MintBurnPanel({
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D] px-4 py-2 text-xs font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
           >
             {submitting ? t.executing : mode === 'MINT' ? t.submitMint : t.submitBurn}
             <ArrowRight className="w-3.5 h-3.5" />
@@ -258,26 +258,26 @@ export function MintBurnPanel({
       {errorInfo && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-3.5 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-3.5 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{errorInfo.text}</span>
           </span>
-          <code className="shrink-0 rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="shrink-0 rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorInfo.code}
           </code>
         </div>
       )}
 
       {lastOrder && (
-        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/30 p-3.5 text-xs space-y-1 font-mono">
-          <div className="flex items-center justify-between text-emerald-300 font-bold">
+        <div className="sm-bento-emerald rounded-2xl p-3.5 text-xs space-y-1 font-mono">
+          <div className="flex items-center justify-between text-[#6EE7B7] font-bold">
             <span className="flex items-center gap-1.5">
               {lastOrder.status === 'QUEUED_TIMELOCK' ? (
-                <Clock className="w-4 h-4 text-amber-400" />
+                <Clock className="w-4 h-4 text-[#FCD34D]" />
               ) : (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <CheckCircle2 className="w-4 h-4 text-[#00DC6D]" />
               )}
               {lastOrder.orderNo} (
               {(t.statusLabels as Record<string, string>)[lastOrder.status] ||
@@ -289,25 +289,25 @@ export function MintBurnPanel({
             </span>
           </div>
           {lastOrder.txHash && (
-            <p className="text-zinc-400 truncate">
+            <p className="text-white/70 truncate">
               {t.txHashLabel}: {lastOrder.txHash}
             </p>
           )}
           {lastOrder.traceId && (
-            <p className="text-cyan-300 truncate">
+            <p className="text-[#67E8F9] truncate">
               {t.traceIdLabel}: {lastOrder.traceId}
             </p>
           )}
           {lastOrder.status === 'QUEUED_TIMELOCK' && (
-            <p className="text-amber-300 font-sans">{t.timelockQueued}</p>
+            <p className="text-[#FCD34D] font-sans">{t.timelockQueued}</p>
           )}
         </div>
       )}
 
-      <div className="space-y-2 pt-2 border-t border-white/10">
-        <span className="text-xs font-semibold uppercase text-zinc-400">{t.recentOrders}</span>
+      <div className="space-y-2 pt-1">
+        <span className="text-xs font-semibold uppercase text-white/60">{t.recentOrders}</span>
         {orders.length === 0 ? (
-          <div className="rounded-xl border border-white/5 bg-zinc-950/70 p-4 text-center text-xs text-zinc-500">
+          <div className="rounded-xl bg-[#24262C] p-4 text-center text-xs text-white/50">
             {t.emptyOrders}
           </div>
         ) : (
@@ -323,29 +323,29 @@ export function MintBurnPanel({
               return (
                 <div
                   key={o.orderNo}
-                  className="rounded-xl border border-white/5 bg-zinc-950/70 px-3 py-2 text-xs flex items-center justify-between gap-2 font-mono"
+                  className="rounded-xl bg-[#24262C] px-3.5 py-2.5 text-xs flex items-center justify-between gap-2 font-mono"
                 >
                   <div className="min-w-0">
                     <span
                       className={
                         o.orderType === 'MINT'
-                          ? 'text-emerald-400 font-bold'
-                          : 'text-amber-400 font-bold'
+                          ? 'text-[#00DC6D] font-bold'
+                          : 'text-[#FCD34D] font-bold'
                       }
                     >
                       {displayType}
                     </span>{' '}
-                    <span className="text-white">${o.amountUsd.toLocaleString()}</span>
-                    <span className="text-zinc-500 ml-2">({o.partnerSite})</span>
+                    <span className="text-[#F4F4F6]">${o.amountUsd.toLocaleString()}</span>
+                    <span className="text-white/45 ml-2">({o.partnerSite})</span>
                     {o.traceId && (
-                      <span className="text-cyan-400/80 ml-2 text-[10px]">[{o.traceId}]</span>
+                      <span className="text-[#67E8F9]/80 ml-2 text-[10px]">[{o.traceId}]</span>
                     )}
                   </div>
                   <span
-                    className={`shrink-0 px-2 py-0.5 rounded text-[10px] ${
+                    className={`shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
                       o.status === 'EXECUTED' || o.status === 'SETTLED'
-                        ? 'bg-emerald-500/15 text-emerald-300'
-                        : 'bg-amber-500/15 text-amber-300'
+                        ? 'bg-[#00DC6D]/15 text-[#00DC6D]'
+                        : 'bg-[#D4A853]/15 text-[#FCD34D]'
                     }`}
                   >
                     {displayStatus}

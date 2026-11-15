@@ -103,17 +103,17 @@ export function DeveloperSdkPanel() {
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/75 p-6 sm:p-8 backdrop-blur-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 sm:p-8 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
           <div className="flex items-center gap-2">
-            <KeyRound className="w-5 h-5 text-emerald-400" />
-            <h2 className="text-lg font-bold text-white">{t.title}</h2>
+            <KeyRound className="w-5 h-5 text-[#00DC6D]" />
+            <h2 className="text-lg font-bold text-[#F4F4F6]">{t.title}</h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">{t.subtitle}</p>
+          <p className="text-xs text-white/60 mt-1">{t.subtitle}</p>
         </div>
         {audit && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-mono text-emerald-300">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-1 text-xs font-mono font-semibold text-[#00DC6D]">
             <Scale className="w-3.5 h-3.5" />
             {t.variancePrefix} {audit.varianceAsdS} USDF / {audit.varianceAsdG} uUSDF
           </span>
@@ -123,13 +123,13 @@ export function DeveloperSdkPanel() {
       {auditErrorCode && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 px-4 py-3 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl px-4 py-3 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0" />
             {resolveError(auditErrorCode)}
           </span>
-          <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {auditErrorCode}
           </code>
         </div>
@@ -139,24 +139,24 @@ export function DeveloperSdkPanel() {
         {credentials.map((cred) => (
           <div
             key={cred.keyId}
-            className="rounded-2xl border border-white/10 bg-zinc-950/75 p-4 space-y-2 text-xs"
+            className="rounded-2xl bg-[#24262C] p-4 space-y-2 text-xs hover:bg-[#26272B] transition"
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono font-bold text-white">
+              <span className="font-mono font-bold text-[#F4F4F6]">
                 {cred.siteDomain}
               </span>
-              <span className="font-mono text-[10px] text-emerald-400">
+              <span className="font-mono text-[10px] text-[#00DC6D]">
                 {cred.keyId}
               </span>
             </div>
-            <p className="font-mono text-[11px] text-zinc-400">
+            <p className="font-mono text-[11px] text-white/60">
               {t.secretPrefix} {cred.maskedSecret}
             </p>
             <div className="flex flex-wrap gap-1 pt-1">
               {cred.scopes.map((sc) => (
                 <span
                   key={sc}
-                  className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-amber-300"
+                  className="rounded-full bg-[#D4A853]/15 px-2 py-0.5 font-mono text-[10px] text-[#FCD34D]"
                 >
                   {sc}
                 </span>
@@ -169,10 +169,10 @@ export function DeveloperSdkPanel() {
       <form
         onSubmit={handleSign}
         noValidate
-        className="rounded-2xl border border-white/10 bg-zinc-950/80 p-5 space-y-4"
+        className="rounded-2xl bg-[#24262C] p-5 space-y-4"
       >
-        <div className="flex items-center gap-2 text-xs font-semibold text-white">
-          <Code2 className="w-4 h-4 text-cyan-400" />
+        <div className="flex items-center gap-2 text-xs font-semibold text-[#F4F4F6]">
+          <Code2 className="w-4 h-4 text-[#00DC6D]" />
           <span>{t.signerTitle}</span>
         </div>
 
@@ -181,21 +181,21 @@ export function DeveloperSdkPanel() {
             value={sourceSite}
             onChange={(e) => setSourceSite(e.target.value)}
             aria-label={t.sourceAria}
-            className="rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white"
+            className="rounded-xl bg-white/[0.075] focus:bg-white/[0.12] px-3 py-2.5 text-xs text-[#F4F4F6] focus:outline-none"
           >
-            <option value="sofayes.com">sofayes.com</option>
-            <option value="hmm.sale">hmm.sale</option>
-            <option value="dezi.life">dezi.life</option>
+            <option value="sofayes.com" className="bg-[#18191C] text-white">sofayes.com</option>
+            <option value="hmm.sale" className="bg-[#18191C] text-white">hmm.sale</option>
+            <option value="dezi.life" className="bg-[#18191C] text-white">dezi.life</option>
           </select>
           <select
             value={targetSite}
             onChange={(e) => setTargetSite(e.target.value)}
             aria-label={t.targetAria}
-            className="rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs text-white"
+            className="rounded-xl bg-white/[0.075] focus:bg-white/[0.12] px-3 py-2.5 text-xs text-[#F4F4F6] focus:outline-none"
           >
-            <option value="idles.site">idles.site</option>
-            <option value="taxyesai.com">taxyesai.com</option>
-            <option value="uptoyes.com">uptoyes.com</option>
+            <option value="idles.site" className="bg-[#18191C] text-white">idles.site</option>
+            <option value="taxyesai.com" className="bg-[#18191C] text-white">taxyesai.com</option>
+            <option value="uptoyes.com" className="bg-[#18191C] text-white">uptoyes.com</option>
           </select>
           <div className="flex gap-2">
             <input
@@ -203,12 +203,12 @@ export function DeveloperSdkPanel() {
               value={amountAsdS}
               onChange={(e) => setAmountAsdS(e.target.value)}
               aria-label={t.amountAria}
-              className="w-full rounded-xl border border-white/10 bg-zinc-900 px-3 py-2 text-xs font-mono text-white"
+              className="w-full rounded-xl bg-white/[0.075] focus:bg-white/[0.12] px-3 py-2.5 text-xs font-mono text-[#F4F4F6] focus:outline-none"
             />
             <button
               type="submit"
               disabled={status === 'LOADING'}
-              className="shrink-0 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-semibold text-zinc-950 hover:bg-cyan-400 transition"
+              className="shrink-0 rounded-full bg-[#00DC6D] px-4 py-2.5 text-xs font-bold text-[#090A0F] hover:bg-[#19E67C] transition"
             >
               {t.signBtn}
             </button>
@@ -216,31 +216,31 @@ export function DeveloperSdkPanel() {
         </div>
 
         {status === 'LOADING' && (
-          <div className="text-xs text-amber-300 flex items-center gap-1.5">
+          <div className="text-xs text-[#FCD34D] flex items-center gap-1.5">
             <Loader2 className="w-3.5 h-3.5 animate-spin" />
             {t.loadingMsg}
           </div>
         )}
         {status === 'ERROR' && (
-          <div className="text-xs text-rose-400 flex items-center justify-between gap-2">
+          <div className="sm-bento-rose rounded-xl p-3 text-xs text-[#FDA4AF] flex items-center justify-between gap-2">
             <span className="flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               {errMsg}
             </span>
             {signErrorCode && (
-              <code className="rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+              <code className="rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
                 {signErrorCode}
               </code>
             )}
           </div>
         )}
         {status === 'SUCCESS' && signedData && (
-          <div className="rounded-xl border border-cyan-500/30 bg-zinc-900/90 p-3.5 space-y-2 text-[11px] font-mono">
-            <div className="flex items-center gap-1.5 text-emerald-400 font-sans font-semibold">
+          <div className="sm-bento-teal rounded-2xl p-4 space-y-2 text-[11px] font-mono">
+            <div className="flex items-center gap-1.5 text-[#00DC6D] font-sans font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {t.signedPrefix} {signedData.hmacSignature}
             </div>
-            <pre className="overflow-x-auto text-zinc-300 bg-black/50 p-2.5 rounded-lg">
+            <pre className="overflow-x-auto text-white/85 bg-[#090A0F]/55 p-3 rounded-xl">
               {signedData.curlSnippet}
             </pre>
           </div>

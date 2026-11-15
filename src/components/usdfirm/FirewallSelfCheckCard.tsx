@@ -37,16 +37,16 @@ export function FirewallSelfCheckCard() {
   };
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-[#090A0F]/90 p-6 backdrop-blur-xl shadow-2xl space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 pb-1">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <LockKeyhole className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base sm:text-lg font-bold text-white">{fw.title}</h3>
+            <LockKeyhole className="w-5 h-5 text-[#00DC6D]" />
+            <h3 className="text-base sm:text-lg font-bold text-[#F4F4F6]">{fw.title}</h3>
           </div>
-          <p className="text-xs text-zinc-400">{fw.subtitle}</p>
+          <p className="text-xs text-white/60">{fw.subtitle}</p>
         </div>
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-mono text-emerald-300">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-1 text-[11px] font-mono font-semibold text-[#00DC6D]">
           {fw.secretGuard}
         </span>
       </div>
@@ -56,7 +56,7 @@ export function FirewallSelfCheckCard() {
           type="button"
           onClick={runSelfCheck}
           disabled={loading}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-zinc-950 hover:bg-emerald-400 disabled:opacity-50 transition"
+          className="inline-flex items-center gap-2 rounded-full bg-[#00DC6D] px-4 py-2 text-xs font-bold text-[#090A0F] hover:bg-[#19E67C] disabled:opacity-50 transition"
         >
           {loading ? (
             <>
@@ -73,10 +73,10 @@ export function FirewallSelfCheckCard() {
 
         {result && (
           <span
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-mono font-bold ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-mono font-bold ${
               result.passed
-                ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
-                : 'border-rose-500/40 bg-rose-500/15 text-rose-300'
+                ? 'bg-[#00DC6D]/15 text-[#00DC6D]'
+                : 'bg-[#F87171]/15 text-[#FDA4AF]'
             }`}
           >
             {result.passed ? (
@@ -90,7 +90,7 @@ export function FirewallSelfCheckCard() {
       </div>
 
       {!result && !errorCode && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-4 text-xs text-zinc-400">
+        <div className="rounded-2xl bg-[#24262C] p-4 text-xs text-white/60">
           {fw.idleHint}
         </div>
       )}
@@ -98,44 +98,44 @@ export function FirewallSelfCheckCard() {
       {errorCode && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-4 text-xs text-rose-200 flex items-center justify-between gap-3"
+          className="sm-bento-rose rounded-2xl p-4 text-xs text-[#FDA4AF] flex items-center justify-between gap-3"
         >
           <span className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
+            <ShieldAlert className="w-4 h-4 shrink-0" />
             {resolveError(errorCode)}
           </span>
-          <code className="shrink-0 rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="shrink-0 rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorCode}
           </code>
         </div>
       )}
 
       {result && (
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/80 p-4 space-y-3 text-xs">
+        <div className="rounded-2xl bg-[#24262C] p-4 space-y-3 text-xs">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <span className="block text-[10px] text-zinc-400 font-sans">{fw.endpointLabel}</span>
-              <span className="text-zinc-200 break-all">{result.endpoint}</span>
+            <div className="rounded-xl bg-[#18191C] p-3">
+              <span className="block text-[10px] text-white/55 font-sans">{fw.endpointLabel}</span>
+              <span className="text-[#F4F4F6] break-all">{result.endpoint}</span>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <span className="block text-[10px] text-zinc-400 font-sans">{fw.httpStatusLabel}</span>
-              <span className={result.httpStatus === 401 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+            <div className="rounded-xl bg-[#18191C] p-3">
+              <span className="block text-[10px] text-white/55 font-sans">{fw.httpStatusLabel}</span>
+              <span className={result.httpStatus === 401 ? 'text-[#00DC6D] font-bold' : 'text-[#FDA4AF] font-bold'}>
                 {fw.httpPrefix} {result.httpStatus}
               </span>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <span className="block text-[10px] text-zinc-400 font-sans">{fw.errorCodeLabel}</span>
-              <span className="text-amber-300 font-bold break-all">{result.errorCode}</span>
+            <div className="rounded-xl bg-[#18191C] p-3">
+              <span className="block text-[10px] text-white/55 font-sans">{fw.errorCodeLabel}</span>
+              <span className="text-[#FCD34D] font-bold break-all">{result.errorCode}</span>
             </div>
-            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <span className="block text-[10px] text-zinc-400 font-sans">{fw.latencyLabel}</span>
-              <span className="text-white font-bold">{result.latencyMs} ms</span>
+            <div className="rounded-xl bg-[#18191C] p-3">
+              <span className="block text-[10px] text-white/55 font-sans">{fw.latencyLabel}</span>
+              <span className="text-[#F4F4F6] font-bold">{result.latencyMs} ms</span>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-white/10 text-zinc-300">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-white/75">
             <span>{resolveError(result.errorCode)}</span>
-            <span className="font-mono text-[11px] text-zinc-500">
+            <span className="font-mono text-[11px] text-white/45">
               {fw.tracePrefix}: {result.traceId} ·{' '}
               {new Date(result.checkedAt).toLocaleTimeString(locale === 'zh' ? 'zh-CN' : 'en-US')}
             </span>

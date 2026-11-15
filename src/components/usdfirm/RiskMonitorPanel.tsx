@@ -85,23 +85,23 @@ export function RiskMonitorPanel({
   );
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-xl shadow-2xl space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+    <div className="rounded-3xl bg-[#1C1D21] p-6 space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-1">
         <div>
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <ShieldAlert className="w-5 h-5 text-cyan-400" />
+          <h3 className="text-lg font-bold text-[#F4F4F6] flex items-center gap-2">
+            <ShieldAlert className="w-5 h-5 text-[#00DC6D]" />
             {t.title}
           </h3>
-          <p className="text-xs text-zinc-400 mt-0.5">{t.subtitle}</p>
+          <p className="text-xs text-white/60 mt-0.5">{t.subtitle}</p>
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-mono font-bold border ${
+          className={`rounded-full px-3.5 py-1 text-xs font-mono font-bold ${
             telemetry.alertLevel === 'NORMAL'
-              ? 'border-emerald-500/40 bg-emerald-500/15 text-emerald-300'
+              ? 'bg-[#00DC6D]/15 text-[#00DC6D]'
               : telemetry.alertLevel === 'WARNING'
-                ? 'border-amber-500/40 bg-amber-500/15 text-amber-300'
-                : 'border-rose-500/40 bg-rose-500/20 text-rose-300 animate-pulse'
+                ? 'bg-[#D4A853]/15 text-[#FCD34D]'
+                : 'bg-[#F87171]/20 text-[#FDA4AF] animate-pulse'
           }`}
         >
           {t.statusPrefix}{' '}
@@ -114,54 +114,58 @@ export function RiskMonitorPanel({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-3.5 space-y-1">
-          <span className="text-zinc-400">{t.pegLabel}</span>
-          <p className="text-lg font-bold font-mono text-white">
+        <div className="sm-bento-slate rounded-2xl p-4 space-y-1">
+          <span className="text-white/65">{t.pegLabel}</span>
+          <p className="text-lg font-bold font-mono text-[#F4F4F6]">
             ${telemetry.currentPegUsd.toFixed(4)}
           </p>
-          <span className="text-[11px] font-mono text-zinc-400">
+          <span className="text-[11px] font-mono text-[#93C5FD]">
             {t.deltaPrefix} {telemetry.depegDeltaBps} bps
           </span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-3.5 space-y-1">
-          <span className="text-zinc-400">{t.breakerLabel}</span>
+        <div
+          className={`rounded-2xl p-4 space-y-1 ${
+            telemetry.circuitBreakerActive ? 'sm-bento-rose' : 'sm-bento-emerald'
+          }`}
+        >
+          <span className="text-white/65">{t.breakerLabel}</span>
           <p
             className={`text-lg font-bold font-mono ${
-              telemetry.circuitBreakerActive ? 'text-rose-400' : 'text-emerald-400'
+              telemetry.circuitBreakerActive ? 'text-[#FDA4AF]' : 'text-[#00DC6D]'
             }`}
           >
             {telemetry.circuitBreakerActive ? t.breakerFrozen : t.breakerActive}
           </p>
-          <span className="text-[11px] text-zinc-500">{t.breakerRule}</span>
+          <span className="text-[11px] text-white/60">{t.breakerRule}</span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-3.5 space-y-1">
-          <span className="text-zinc-400">{t.segregationLabel}</span>
-          <p className="text-lg font-bold font-mono text-emerald-400">
+        <div className="sm-bento-teal rounded-2xl p-4 space-y-1">
+          <span className="text-white/65">{t.segregationLabel}</span>
+          <p className="text-lg font-bold font-mono text-[#67E8F9]">
             {telemetry.isExchangeRiskSegregated ? t.segregatedYes : t.segregatedNo}
           </p>
-          <span className="text-[11px] text-zinc-500">{t.segregationSub}</span>
+          <span className="text-[11px] text-white/60">{t.segregationSub}</span>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-zinc-950/70 p-3.5 space-y-1">
-          <span className="text-zinc-400">{t.velocityLabel}</span>
-          <p className="text-lg font-bold font-mono text-amber-300">
+        <div className="sm-bento-amber rounded-2xl p-4 space-y-1">
+          <span className="text-white/65">{t.velocityLabel}</span>
+          <p className="text-lg font-bold font-mono text-[#FCD34D]">
             {capPct}% {t.usedSuffix}
           </p>
-          <span className="text-[11px] font-mono text-zinc-500">
+          <span className="text-[11px] font-mono text-white/60">
             ${(telemetry.dailyMintVolumeUsd / 1_000_000).toFixed(2)}M / $25M
           </span>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/80 p-3.5 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-[#24262C] p-4 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             disabled={loading || telemetry.circuitBreakerActive}
             onClick={() => triggerRiskAction('PAUSE', t.reasonPause)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 font-semibold text-rose-300 hover:bg-rose-500/25 disabled:opacity-40 transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#F87171]/15 px-3.5 py-2 font-semibold text-[#FDA4AF] hover:bg-[#F87171]/25 disabled:opacity-40 transition"
           >
             <PauseCircle className="w-3.5 h-3.5" />
             {t.freezeBtn}
@@ -170,21 +174,21 @@ export function RiskMonitorPanel({
             type="button"
             disabled={loading}
             onClick={() => triggerRiskAction('RESUME', t.reasonResume)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 font-semibold text-emerald-300 hover:bg-emerald-500/25 disabled:opacity-40 transition"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#00DC6D]/15 px-3.5 py-2 font-semibold text-[#00DC6D] hover:bg-[#00DC6D]/25 disabled:opacity-40 transition"
           >
             <PlayCircle className="w-3.5 h-3.5" />
             {t.resumeBtn}
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="text-zinc-400">{t.stressLabel}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-white/60">{t.stressLabel}</span>
           <input
             type="number"
             step="0.001"
             value={simPeg}
             onChange={(e) => setSimPeg(e.target.value)}
-            className="w-20 rounded-lg border border-white/10 bg-zinc-900 px-2 py-1 font-mono text-white"
+            className="w-24 rounded-full bg-white/[0.075] focus:bg-white/[0.12] px-3 py-1.5 font-mono text-[#F4F4F6] focus:outline-none"
           />
           <button
             type="button"
@@ -192,7 +196,7 @@ export function RiskMonitorPanel({
             onClick={() =>
               triggerRiskAction('SIMULATE_DEPEG', t.reasonDepeg, Number(simPeg))
             }
-            className="rounded-xl bg-amber-500 px-3 py-1.5 font-bold text-zinc-950 hover:bg-amber-400 transition"
+            className="rounded-full bg-[#D4A853] px-4 py-1.5 font-bold text-[#090A0F] hover:bg-[#FCD34D] transition"
           >
             {t.simulateBtn}
           </button>
@@ -202,31 +206,31 @@ export function RiskMonitorPanel({
       {errorInfo && (
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/40 bg-rose-950/60 p-3 text-xs text-rose-200 flex items-center justify-between gap-2"
+          className="sm-bento-rose rounded-2xl p-3.5 text-xs text-[#FDA4AF] flex items-center justify-between gap-2"
         >
           <span className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 shrink-0" />
             <span>{errorInfo.text}</span>
           </span>
-          <code className="shrink-0 rounded bg-black/40 px-2 py-0.5 font-mono text-[10px] text-rose-300">
+          <code className="shrink-0 rounded-full bg-[#090A0F]/60 px-2.5 py-0.5 font-mono text-[10px] text-[#FDA4AF]">
             {errorInfo.code}
           </code>
         </div>
       )}
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs text-zinc-400">
-          <span className="font-semibold uppercase flex items-center gap-1.5 text-zinc-300">
-            <Hash className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="flex items-center justify-between text-xs text-white/60">
+          <span className="font-semibold uppercase flex items-center gap-1.5 text-white/80">
+            <Hash className="w-3.5 h-3.5 text-[#00DC6D]" />
             {t.auditTitle}
           </span>
-          <span className="flex items-center gap-1 text-emerald-400 font-mono">
+          <span className="flex items-center gap-1 text-[#00DC6D] font-mono font-semibold">
             <Activity className="w-3.5 h-3.5" /> {t.chainVerified}
           </span>
         </div>
 
         {auditLogs.length === 0 ? (
-          <div className="rounded-xl border border-white/5 bg-zinc-950/90 p-4 text-center text-xs text-zinc-500">
+          <div className="rounded-xl bg-[#24262C] p-4 text-center text-xs text-white/55">
             {t.emptyLogs}
           </div>
         ) : (
@@ -239,15 +243,15 @@ export function RiskMonitorPanel({
               return (
                 <div
                   key={log.id || log.sequenceNum}
-                  className="rounded-xl border border-white/5 bg-zinc-950/90 p-2.5 space-y-1"
+                  className="rounded-xl bg-[#24262C] hover:bg-[#26272B] transition p-3 space-y-1"
                 >
-                  <div className="flex items-center justify-between text-zinc-400">
+                  <div className="flex items-center justify-between text-white/55">
                     <span>
-                      <strong className="text-emerald-300">
+                      <strong className="text-[#00DC6D]">
                         {log.id || `#${log.sequenceNum}`}
                       </strong>{' '}
                       [{(t.actionLabels as Record<string, string>)[log.action] || log.action}] ·{' '}
-                      <span className="text-white">{log.actor}</span>
+                      <span className="text-[#F4F4F6]">{log.actor}</span>
                     </span>
                     <span>
                       {new Date(log.timestamp).toLocaleTimeString(
@@ -255,8 +259,8 @@ export function RiskMonitorPanel({
                       )}
                     </span>
                   </div>
-                  <p className="text-zinc-300 truncate">{summary}</p>
-                  <p className="text-[10px] text-cyan-400/80 truncate">
+                  <p className="text-white/75 truncate">{summary}</p>
+                  <p className="text-[10px] text-[#67E8F9]/85 truncate">
                     SHA256: {log.currHash} ({log.prevHash.slice(0, 14)}...)
                   </p>
                 </div>
