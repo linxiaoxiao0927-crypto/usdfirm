@@ -178,6 +178,15 @@ final class MainViewController: UIViewController, WKNavigationDelegate, WKUIDele
         config.userContentController.addUserScript(script)
 #endif
 
+        let safeInsets = resolvedSafeAreaInsets()
+        config.userContentController.addUserScript(
+            WKUserScript(
+                source: buildSafeAreaJS(top: safeInsets.top, bottom: safeInsets.bottom),
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: false
+            )
+        )
+
         webView = WKWebView(frame: .zero, configuration: config)
         webView.translatesAutoresizingMaskIntoConstraints = false
         webView.navigationDelegate = self
@@ -524,10 +533,51 @@ final class MainViewController: UIViewController, WKNavigationDelegate, WKUIDele
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.4, execute: item)
     }
 
+    private func resolvedSafeAreaInsets() -> UIEdgeInsets {
+        let raw = webView?.safeAreaInsets ?? view.safeAreaInsets
+        if raw.top > 0 || raw.bottom > 0 {
+            return raw
+        }
+        let hasHomeIndicator = UIDevice.current.userInterfaceIdiom == .phone && UIScreen.main.bounds.height >= 812
+        return hasHomeIndicator
+            ? UIEdgeInsets(top: 54, left: 0, bottom: 34, right: 0)
+            : UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+    }
+
+    private func buildSafeAreaJS(top: CGFloat, bottom: CGFloat) -> String {
+        let topPx = Int(top.rounded())
+        let bottomPx = Int(bottom.rounded())
+        return """
+        (function() {
+          try {
+            var r = document.documentElement;
+            if (r && r.style) {
+              r.style.setProperty('--sm-safe-top', '\(topPx)px');
+              r.style.setProperty('--sm-safe-bottom', '\(bottomPx)px');
+              r.style.setProperty('--sfy-native-safe-top', '\(topPx)px');
+              r.style.setProperty('--sfy-native-safe-bottom', '\(bottomPx)px');
+            }
+          } catch (e) {}
+        })();
+        """
+    }
+
+    private func syncSafeAreaInsets() {
+        guard let webView = webView else { return }
+        let insets = resolvedSafeAreaInsets()
+        webView.evaluateJavaScript(buildSafeAreaJS(top: insets.top, bottom: insets.bottom), completionHandler: nil)
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        syncSafeAreaInsets()
+    }
+
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         processCrashCount = 0
         refreshControl.endRefreshing()
         errorOverlay.isHidden = true
+        syncSafeAreaInsets()
         dismissInitialLoading()
     }
 

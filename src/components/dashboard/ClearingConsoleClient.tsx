@@ -201,8 +201,8 @@ export function ClearingConsoleClient({
 
   return (
     <div className="relative min-h-screen bg-[#111215] text-[#F4F4F6] flex flex-col overflow-x-hidden">
-      <header className="sticky top-0 z-40 bg-[#141519]/88 backdrop-blur-2xl">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-[max(10px,env(safe-area-inset-top))] pb-2.5 flex items-center justify-between gap-3">
+      <header className="sticky top-0 z-40 pt-[max(env(safe-area-inset-top,0px),var(--sm-safe-top,0px))] bg-[#141519]/88 backdrop-blur-2xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-2.5 pb-2.5 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">
             <button
               type="button"

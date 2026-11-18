@@ -10,13 +10,14 @@ export function UsdfirmPageHeader() {
   const t = copy.dedicatedPage;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#141519]/88 backdrop-blur-2xl">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-[max(10px,env(safe-area-inset-top))] pb-2.5 flex items-center justify-between gap-3">
+    <header className="sticky top-0 z-40 pt-[max(env(safe-area-inset-top,0px),var(--sm-safe-top,0px))] bg-[#141519]/88 backdrop-blur-2xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-2.5 pb-2.5 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <Link
             href="/"
+            data-ios-subpage-back="1"
             aria-label={t.backHome}
-            className="w-10 h-10 rounded-full bg-[#1C1D21] hover:bg-[#24262C] flex items-center justify-center text-[#F4F4F6] active:scale-95 transition shrink-0"
+            className="min-w-[44px] h-11 rounded-full bg-[#1C1D21] hover:bg-[#24262C] flex items-center justify-center text-[#F4F4F6] active:scale-95 transition shrink-0 whitespace-nowrap"
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
