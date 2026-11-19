@@ -105,6 +105,109 @@ function fallbackBrandFromHost(domain) {
   return [cap, cap];
 }
 
+const BRAND_DESC_MAP = {
+  'sofayes.com': [
+    'SofaYes 超级生态入口，集合即时通讯、音视频内容、AI 互动学习与生活服务。',
+    'SofaYes is an integrated app combining messaging, media creation, AI learning, and daily services.',
+  ],
+  'marrychat.com': [
+    'MarryChat 真实严谨的精品单身交友社区。',
+    'MarryChat is a curated singles community focused on authentic profiles.',
+  ],
+  'novelyes.com': [
+    'NovelYes 多语种 AI 小说与短剧脚本创作出海平台。',
+    'NovelYes is a multilingual AI storytelling and short-drama script studio.',
+  ],
+  'ieternal.life': [
+    'iEternal 坚持本人显式授权的数字记忆与声音存档平台。',
+    'iEternal provides consent-verified digital memory and voice archiving.',
+  ],
+  'xmyall.com': [
+    'XMyAll 创作者多平台链接与数字名片聚合页。',
+    'XMyAll is a unified link-in-bio hub for digital creators.',
+  ],
+  'xpayes.com': [
+    'XPayes 全球支付与多币种网关（当前处于独立隔离测试阶段，非公开生产服务）。',
+    'XPayes is a global payment and multi-currency gateway (currently in isolated sandbox testing).',
+  ],
+  'itisdeal.com': [
+    'ItisDeal 独立数字资产撮合系统（当前处于物理隔离测试阶段，请注意市场风险）。',
+    'ItisDeal is an isolated digital asset matching engine (currently in sandbox testing; market risk applies).',
+  ],
+  'usdfirm.com': [
+    'USDFirm 稳定币协议与储备透明度公示节点（当前处于独立隔离测试阶段）。',
+    'USDFirm is an isolated stablecoin protocol and reserve transparency portal (sandbox testing).',
+  ],
+  'itiscoin.com': [
+    'ItisCoin 底层财资清算与生态治理中心（非交易所，当前处于隔离测试阶段）。',
+    'ItisCoin is a treasury settlement and governance hub (not an exchange; currently in sandbox testing).',
+  ],
+  'asdcoin.com': [
+    'ASDCoin 为 ItisCoin 官方备用域名（当前处于隔离测试阶段）。',
+    'ASDCoin is the official backup domain for ItisCoin (currently in sandbox testing).',
+  ],
+  'fitjob.ai': [
+    'FitJob 面向全球技术团队的 AI 招聘筛选、背调与合规用工平台。',
+    'FitJob connects global teams with vetted engineering talent and EOR hiring workflows.',
+  ],
+  'aiads.chat': [
+    'AIAds 对话式智能广告投放与合规素材协同助手。',
+    'AIAds is a conversational ad-campaign assistant with pre-launch compliance checks.',
+  ],
+  'idles.site': [
+    'Idles 分布式闲置 GPU 算力调度与按需计费网络。',
+    'Idles is an on-demand distributed GPU compute marketplace.',
+  ],
+  'hmm.sale': [
+    'Hmm.Sale 汇聚自有消费品牌的跨境电商商场与包税履约入口。',
+    'Hmm.Sale is a cross-border mall featuring in-house brands with transparent DDP shipping.',
+  ],
+  'dezi.life': [
+    '嘚滋 DEZI 本地生活与智慧餐饮服务平台，涵盖到店团购与门店 KDS 系统。',
+    'DEZI is a local-life dining and smart restaurant SaaS platform with store KDS.',
+  ],
+  'lookplum.com': [
+    '望梅 LookPlum 传统草本饮品与酸梅汤品牌独立站。',
+    'LookPlum is an independent herbal beverage brand storefront.',
+  ],
+  'trelry.com': [
+    'Trelry 聚焦服饰、配饰与护肤的自有消费品牌独立站。',
+    'Trelry is an in-house apparel, jewelry, and skincare storefront.',
+  ],
+  'skomolr.com': [
+    'Skomolr 自有美妆与个人护肤品牌独立站。',
+    'Skomolr is an independent beauty and skincare brand storefront.',
+  ],
+  'persntrny.com': [
+    '佩袭妮 Persntrny 自有女装品牌官方门户。',
+    'Persntrny is an independent womenswear brand storefront.',
+  ],
+  'shinemight.com': [
+    'ShineMight 集团控股门户，统筹软件矩阵、商业基础设施与数字音频厂牌。',
+    'ShineMight is a holding studio building AI-native software, commerce infrastructure, and music.',
+  ],
+  'xallin.xyz': [
+    'XAllIn 聚焦 AI 基础设施与研发工具的聚合入口。',
+    'XAllIn aggregates AI infrastructure experiments and developer tooling.',
+  ],
+  'alledu.xyz': [
+    'AllEdu 面向学习者的 AI 互动辅导与练习空间。',
+    'AllEdu provides interactive AI-assisted learning experiences.',
+  ],
+  'ailedu.xyz': [
+    'AilEdu 面向学习者的 AI 互动辅导与练习空间。',
+    'AilEdu provides interactive AI-assisted learning experiences.',
+  ],
+  'xteacher.xyz': [
+    'XTeacher AI 虚拟私教与自适应学习助手。',
+    'XTeacher is an AI tutor and adaptive study companion.',
+  ],
+  'hllo.cn': [
+    'Hllo 轻量化媒体实用工具实验站点。',
+    'Hllo is an experimental lightweight media utility site.',
+  ],
+};
+
 function defaultVariants() {
   return [
     { key: 'a', label_zh: '方案 A (基准)', label_en: 'Variant A (Control)', weight: 100, origin: '' },
@@ -291,26 +394,28 @@ function randomVid() {
 }
 
 async function computeBucketBps(secret, keyStr) {
+  // Deterministic A/B or canary bucketing seed only (never used for auth).
   const bytes = await hmacBytes(secret || 'sm-ab-default-seed', keyStr);
   const u32 = ((bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3]) >>> 0;
   return u32 % 10000;
 }
 
 async function makeInternalPassToken(domain) {
-  const secret = process.env.STEALTH_PREVIEW_SECRET || 'sm-edge-internal';
+  const secret = process.env.STEALTH_PREVIEW_SECRET;
+  if (!secret) return '';
   const bucket = Math.floor(Date.now() / 60000);
   return `${bucket}.${await hmacHex(secret, `internal|${domain}|${bucket}`)}`;
 }
 
 async function verifyInternalPassToken(domain, token) {
-  if (!token || typeof token !== 'string') return false;
+  const secret = process.env.STEALTH_PREVIEW_SECRET;
+  if (!secret || !token || typeof token !== 'string') return false;
   const parts = token.split('.');
   if (parts.length !== 2) return false;
   const bucket = Number(parts[0]);
   const sig = parts[1];
   const nowBucket = Math.floor(Date.now() / 60000);
   if (!Number.isFinite(bucket) || Math.abs(nowBucket - bucket) > 1) return false;
-  const secret = process.env.STEALTH_PREVIEW_SECRET || 'sm-edge-internal';
   const expected = await hmacHex(secret, `internal|${domain}|${bucket}`);
   return timingSafeEq(expected, sig);
 }
@@ -443,16 +548,38 @@ function detectZh(request) {
   return true;
 }
 
-function securityHeaders(contentType) {
-  return {
+function securityHeaders(contentType, allowIndex = false) {
+  const hdrs = {
     'Content-Type': contentType,
-    'Cache-Control': 'private, no-store, no-cache, must-revalidate, max-age=0',
-    'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet',
+    'Cache-Control': allowIndex ? 'public, max-age=300' : 'private, no-store, no-cache, must-revalidate, max-age=0',
     'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload',
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'SAMEORIGIN',
+    'Content-Security-Policy': "frame-ancestors 'self'",
     'Referrer-Policy': 'strict-origin-when-cross-origin',
   };
+  if (!allowIndex) {
+    hdrs['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet';
+  }
+  return hdrs;
+}
+
+function applyBaselineSecurityHeaders(outHeaders) {
+  if (!outHeaders.has('Strict-Transport-Security')) {
+    outHeaders.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  }
+  if (!outHeaders.has('X-Content-Type-Options')) {
+    outHeaders.set('X-Content-Type-Options', 'nosniff');
+  }
+  if (!outHeaders.has('X-Frame-Options')) {
+    outHeaders.set('X-Frame-Options', 'SAMEORIGIN');
+  }
+  if (!outHeaders.has('Content-Security-Policy')) {
+    outHeaders.set('Content-Security-Policy', "frame-ancestors 'self'");
+  }
+  if (!outHeaders.has('Referrer-Policy')) {
+    outHeaders.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  }
 }
 
 function renderMonogramSvg(letter) {
@@ -462,8 +589,10 @@ function renderMonogramSvg(letter) {
 
 function renderStealthHtml(gate, isZh, showAdminTrigger) {
   const isBrand = gate.mode === 'brand';
-  const bZh = escapeHtml(gate.brand_name_zh || gate.domain);
-  const bEn = escapeHtml(gate.brand_name_en || gate.domain);
+  const bZhRaw = gate.brand_name_zh || gate.domain;
+  const bEnRaw = gate.brand_name_en || gate.domain;
+  const bZh = escapeHtml(bZhRaw);
+  const bEn = escapeHtml(bEnRaw);
   const tZh = escapeHtml(gate.tagline_zh || '独立数字体验空间');
   const tEn = escapeHtml(gate.tagline_en || 'Independent Digital Studio');
   const nZh = escapeHtml(gate.notice_zh || '系统维护中，正在更新升级');
@@ -474,14 +603,39 @@ function renderStealthHtml(gate, isZh, showAdminTrigger) {
 
   const pageTitleZh = isBrand ? bZh : `${bZh} · 维护更新中`;
   const pageTitleEn = isBrand ? bEn : `${bEn} · Under Maintenance`;
+  const pageTitle = isZh ? pageTitleZh : pageTitleEn;
+
+  const brandPair = BRAND_DESC_MAP[gate.domain];
+  const rawDesc = isZh
+    ? ((brandPair && brandPair[0]) || gate.tagline_zh || '独立数字体验空间')
+    : ((brandPair && brandPair[1]) || gate.tagline_en || 'Independent Digital Studio');
+  const canonicalHost = gate.domain ? publicHostForDomain(gate.domain) : '';
+  const canonicalUrl = canonicalHost && !canonicalHost.includes('/') ? `https://${canonicalHost}/` : '';
+  const ldJson = canonicalUrl && !showAdminTrigger
+    ? `<script type="application/ld+json">${JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Organization',
+        name: isZh ? bZhRaw : bEnRaw,
+        url: canonicalUrl,
+        description: rawDesc,
+      }).replace(/</g, '\\u003c')}</script>`
+    : '';
 
   return `<!doctype html>
 <html lang="${isZh ? 'zh-CN' : 'en'}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="robots" content="noindex, nofollow, noarchive" />
-  <title>${isZh ? pageTitleZh : pageTitleEn}</title>
+  <meta name="robots" content="${isBrand && !showAdminTrigger ? 'index, follow' : 'noindex, nofollow, noarchive'}" />
+  <title>${pageTitle}</title>
+  <meta name="description" content="${escapeHtml(rawDesc)}" />
+  ${canonicalUrl && !showAdminTrigger ? `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />` : ''}
+  <meta property="og:title" content="${pageTitle}" />
+  <meta property="og:description" content="${escapeHtml(rawDesc)}" />
+  <meta property="og:type" content="website" />
+  ${canonicalUrl && !showAdminTrigger ? `<meta property="og:url" content="${escapeHtml(canonicalUrl)}" />` : ''}
+  <meta name="twitter:card" content="summary" />
+  ${ldJson}
   <link rel="icon" href="/favicon.ico" type="image/svg+xml" />
   <style>
     :root { color-scheme: dark; }
@@ -1843,6 +1997,7 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
   // 8. Evaluate Root-Domain Gate Permission
   const vid = cookies.__sm_vid || randomVid();
   const needSetVid = !cookies.__sm_vid;
+  // Bucketing seed only (never used for auth/session verification).
   const secret = process.env.STEALTH_PREVIEW_SECRET || 'sm-ab-seed';
 
   let allowedThrough = false;
@@ -1857,10 +2012,25 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
 
   // 9. Blocked -> Render Stealth Maintenance / Brand Page & Crawler Shields
   if (!allowedThrough) {
+    const isBrandMode = gate.mode === 'brand';
     if (pathname === '/robots.txt') {
+      if (isBrandMode) {
+        return new Response(
+          `User-agent: *\nAllow: /\nDisallow: /test\nDisallow: /__sm_\nSitemap: https://${publicHostForDomain(domain)}/sitemap.xml\n`,
+          { status: 200, headers: securityHeaders('text/plain; charset=utf-8', true) }
+        );
+      }
       return new Response('User-agent: *\nDisallow: /\n', {
         status: 200,
         headers: securityHeaders('text/plain; charset=utf-8'),
+      });
+    }
+    if (pathname === '/sitemap.xml' && isBrandMode) {
+      const hostPub = publicHostForDomain(domain);
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://${escapeHtml(hostPub)}/</loc></url>\n</urlset>\n`;
+      return new Response(xml, {
+        status: 200,
+        headers: securityHeaders('application/xml; charset=utf-8', true),
       });
     }
     if (pathname === '/sitemap.xml' || pathname.endsWith('.xml')) {
@@ -1901,7 +2071,7 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
     }
     return new Response(renderStealthHtml(gate, isZh, false), {
       status: 200,
-      headers: securityHeaders('text/html; charset=utf-8'),
+      headers: securityHeaders('text/html; charset=utf-8', isBrandMode),
     });
   }
 
@@ -1950,6 +2120,7 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
   if (!targetOriginUrl && !needsHtmlInjection) {
     const baseRes = await passThroughFn();
     const outHeaders = new Headers(baseRes.headers);
+    applyBaselineSecurityHeaders(outHeaders);
     outHeaders.set('X-SM-Variant', activeVariant);
     if (isSandbox) outHeaders.set('X-SM-Sandbox', '1');
     if (needSetVid) {
@@ -1978,7 +2149,10 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
       fwdHeaders.set('Host', targetOriginUrl.host);
       fwdHeaders.set('X-SM-Orig-Host', rawHost);
     } else {
-      fwdHeaders.set('x-sm-internal-pass', await makeInternalPassToken(domain));
+      const internalTok = await makeInternalPassToken(domain);
+      if (internalTok) {
+        fwdHeaders.set('x-sm-internal-pass', internalTok);
+      }
     }
 
     const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
@@ -1990,6 +2164,7 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
     });
 
     const outHeaders = new Headers(upRes.headers);
+    applyBaselineSecurityHeaders(outHeaders);
     outHeaders.set('X-SM-Variant', activeVariant);
     if (isSandbox) outHeaders.set('X-SM-Sandbox', '1');
     if (needSetVid) {
