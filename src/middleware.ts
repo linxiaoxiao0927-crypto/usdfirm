@@ -25,13 +25,67 @@ const BU02_DOMAINS = new Set([
 
 const STATIC_EXT_RE = /\.(?:js|mjs|cjs|css|map|png|jpg|jpeg|gif|webp|avif|svg|ico|woff|woff2|ttf|otf|eot|mp4|webm|m4s|m3u8|ts|mp3|wav|ogg|aac|flac|pdf|zip|wasm|json|xml|txt|vtt)$/i;
 const BOT_UA_RE = /(?:Googlebot|bingbot|Baiduspider|YandexBot|DuckDuckBot|Slurp|Applebot|Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp)/i;
+const STRICT_CRAWLER_UA_RE = /(?:Googlebot|Google-InspectionTool|GoogleOther|AdsBot-Google|APIs-Google|Mediapartners-Google|Storebot-Google|Baiduspider|Bingbot|msnbot|BingPreview|Bytespider|Sogou|360Spider|YisouSpider|HaoSouSpider|Shenma|YandexBot|DuckDuckBot|Slurp|Applebot|Applebot-Extended|GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|Claude-Web|anthropic-ai|PerplexityBot|Perplexity-User|CCBot|Amazonbot|Meta-ExternalAgent|facebookexternalhit|Twitterbot|LinkedInBot|TelegramBot|WhatsApp|Slackbot|Discordbot|AhrefsBot|SemrushBot|MJ12bot|DotBot|PetalBot|BLEXBot|DataForSeoBot|ZoominfoBot|Scrapy|HeadlessChrome|PhantomJS)/i;
+const STRICT_NOINDEX_HEADER = 'noindex, nofollow, noarchive, nosnippet, noimageindex, noai, noimageai';
+const STRICT_ROBOTS_TXT = [
+  'User-agent: *',
+  'Disallow: /',
+  '',
+  'User-agent: Googlebot',
+  'Disallow: /',
+  'User-agent: Baiduspider',
+  'Disallow: /',
+  'User-agent: Bingbot',
+  'Disallow: /',
+  'User-agent: Bytespider',
+  'Disallow: /',
+  'User-agent: Sogou web spider',
+  'Disallow: /',
+  'User-agent: 360Spider',
+  'Disallow: /',
+  'User-agent: YisouSpider',
+  'Disallow: /',
+  'User-agent: YandexBot',
+  'Disallow: /',
+  'User-agent: Applebot',
+  'Disallow: /',
+  'User-agent: Applebot-Extended',
+  'Disallow: /',
+  'User-agent: GPTBot',
+  'Disallow: /',
+  'User-agent: ChatGPT-User',
+  'Disallow: /',
+  'User-agent: OAI-SearchBot',
+  'Disallow: /',
+  'User-agent: ClaudeBot',
+  'Disallow: /',
+  'User-agent: anthropic-ai',
+  'Disallow: /',
+  'User-agent: PerplexityBot',
+  'Disallow: /',
+  'User-agent: CCBot',
+  'Disallow: /',
+  'User-agent: Amazonbot',
+  'Disallow: /',
+  'User-agent: Meta-ExternalAgent',
+  'Disallow: /',
+  'User-agent: AhrefsBot',
+  'Disallow: /',
+  'User-agent: SemrushBot',
+  'Disallow: /',
+  '',
+].join('\n');
 
 function normalizeHost(rawHost) {
   let h = String(rawHost || '').toLowerCase().trim().split(':')[0];
   if (h.startsWith('www.')) h = h.slice(4);
   if (h === 'data.shinemight.com' || h === 'admin.shinemight.com') return 'shinemight.com';
   if (h === 'ytdlp.hllo.cn') return 'hllo.cn';
+  if (h === 'cut.sofayes.com' || h === 'sofayes-cut.pages.dev' || h.endsWith('.sofayes-cut.pages.dev')) {
+    return 'sofacut.sofayes.com';
+  }
   if (h.endsWith('.vercel.app')) {
+    if (h.startsWith('sofayes-music')) return 'cloud-music.sofayes.com';
     const slug = (h.split('.')[0] || '').split('-')[0];
     const vercelMap = {
       sofayes: 'sofayes.com',
@@ -72,6 +126,9 @@ function publicHostForDomain(domain) {
 function fallbackBrandFromHost(domain) {
   const map = {
     'sofayes.com': ['SofaYes', 'SofaYes'],
+    'music.sofayes.com': ['沙发耶音乐 SofaMusic', 'SofaMusic'],
+    'cloud-music.sofayes.com': ['沙发耶音乐云端版', 'SofaMusic Cloud'],
+    'sofacut.sofayes.com': ['沙发剪 SofaCut', 'SofaCut'],
     'marrychat.com': ['MarryChat', 'MarryChat'],
     'novelyes.com': ['NovelYes', 'NovelYes'],
     'ieternal.life': ['iEternal', 'iEternal'],
@@ -109,6 +166,18 @@ const BRAND_DESC_MAP = {
   'sofayes.com': [
     'SofaYes 超级生态入口，集合即时通讯、音视频内容、AI 互动学习与生活服务。',
     'SofaYes is an integrated app combining messaging, media creation, AI learning, and daily services.',
+  ],
+  'music.sofayes.com': [
+    '沙发耶音乐 SofaMusic：云端无损曲库、听歌识曲与 iOS/桌面原生直连空间。',
+    'SofaMusic: cloud lossless catalog, audio recognition, and native app hub.',
+  ],
+  'cloud-music.sofayes.com': [
+    '沙发耶音乐云端版：全网直连曲库节点与移动端安装包在线分发中心。',
+    'SofaMusic Cloud: global catalog sync node and mobile app OTA distribution.',
+  ],
+  'sofacut.sofayes.com': [
+    '沙发剪 SofaCut：AI 智能视频剪辑、多轨时间轴与 WebCodecs 极速成片工坊。',
+    'SofaCut: AI-native video editor and multitrack WebCodecs studio.',
   ],
   'marrychat.com': [
     'MarryChat 真实严谨的精品单身交友社区。',
@@ -559,9 +628,16 @@ function securityHeaders(contentType, allowIndex = false) {
     'Referrer-Policy': 'strict-origin-when-cross-origin',
   };
   if (!allowIndex) {
-    hdrs['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet';
+    hdrs['X-Robots-Tag'] = STRICT_NOINDEX_HEADER;
   }
   return hdrs;
+}
+
+function buildCrawlerBlockedResponse() {
+  return new Response('Access Denied: Pre-launch Crawling Disabled\n', {
+    status: 403,
+    headers: securityHeaders('text/plain; charset=utf-8', false),
+  });
 }
 
 function applyBaselineSecurityHeaders(outHeaders) {
@@ -611,7 +687,7 @@ function renderStealthHtml(gate, isZh, showAdminTrigger) {
     : ((brandPair && brandPair[1]) || gate.tagline_en || 'Independent Digital Studio');
   const canonicalHost = gate.domain ? publicHostForDomain(gate.domain) : '';
   const canonicalUrl = canonicalHost && !canonicalHost.includes('/') ? `https://${canonicalHost}/` : '';
-  const ldJson = canonicalUrl && !showAdminTrigger
+  const ldJson = canonicalUrl && isBrand && !showAdminTrigger
     ? `<script type="application/ld+json">${JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'Organization',
@@ -626,7 +702,7 @@ function renderStealthHtml(gate, isZh, showAdminTrigger) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="robots" content="${isBrand && !showAdminTrigger ? 'index, follow' : 'noindex, nofollow, noarchive'}" />
+  <meta name="robots" content="${isBrand && !showAdminTrigger ? 'index, follow' : 'noindex, nofollow, noarchive, nosnippet, noimageindex'}" />
   <title>${pageTitle}</title>
   <meta name="description" content="${escapeHtml(rawDesc)}" />
   ${canonicalUrl && !showAdminTrigger ? `<link rel="canonical" href="${escapeHtml(canonicalUrl)}" />` : ''}
@@ -834,7 +910,7 @@ function renderTestPortalHtml(gate, auth, pinnedVariant, isZh, nextPath, errCode
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
   <title>${isZh ? `${bZh} · 测试预览中心` : `${bEn} · TestFlight Portal`}</title>
   <link rel="icon" href="/favicon.ico" type="image/svg+xml" />
   <style>
@@ -1066,7 +1142,7 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
   <title>${isZh ? '全矩阵门禁与 A/B/C 实验总控台' : 'Matrix Gate & A/B/C Console'}</title>
   <style>
     :root { color-scheme: dark; }
@@ -1128,9 +1204,15 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
       border: 1px solid rgba(255,255,255,0.09); display: flex; flex-direction: column; gap: 12px;
     }
     .card.focus-dom { border-color: rgba(16,185,129,0.55); box-shadow: 0 0 0 1px rgba(16,185,129,0.25); }
-    .c-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-    .dom { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 15px; font-weight: 700; color: #FFF; }
-    .brand { font-size: 12px; color: #A1A1AA; margin-top: 2px; }
+    .c-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .c-head-main { flex: 1; min-width: 0; }
+    .dom {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(20px, 5vw, 23px); font-weight: 800; line-height: 1.22;
+      letter-spacing: -0.02em; color: #FFF; overflow-wrap: anywhere;
+    }
+    .desc { font-size: 13px; line-height: 1.48; color: #D4D4D8; margin-top: 6px; font-weight: 450; }
+    .brand { font-size: 11.5px; color: #71717A; margin-top: 5px; }
     .tag { font-size: 11px; padding: 3px 9px; border-radius: 999px; background: #1C1C1E; color: #D4D4D8; border: 1px solid rgba(255,255,255,0.10); white-space: nowrap; flex-shrink: 0; }
     .tag.focus { background: rgba(16,185,129,0.16); color: #34D399; border-color: rgba(16,185,129,0.38); }
     .modes {
@@ -1292,6 +1374,117 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
 
       var BU_LIST = ['ALL', 'CURRENT', 'BU-01', 'BU-02', 'BU-03', 'BU-04', 'BU-05', 'BU-06'];
 
+      var DOMAIN_PRIORITY = {
+        'sofayes.com': 1,
+        'music.sofayes.com': 2,
+        'cloud-music.sofayes.com': 3,
+        'sofacut.sofayes.com': 4,
+        'dezi.life': 5,
+        'shinemight.com': 6,
+        'hmm.sale': 10,
+        'novelyes.com': 11,
+        'marrychat.com': 12,
+        'ieternal.life': 13,
+        'xmyall.com': 14,
+        'xpayes.com': 20,
+        'usdfirm.com': 21,
+        'itisdeal.com': 22,
+        'itiscoin.com': 23,
+        'asdcoin.com': 24,
+        'fitjob.ai': 30,
+        'aiads.chat': 31,
+        'idles.site': 32,
+        'lookplum.com': 40,
+        'trelry.com': 41,
+        'skomolr.com': 42,
+        'persntrny.com': 43,
+        'decdics.com': 44,
+        'xallin.xyz': 50,
+        'xteacher.xyz': 51,
+        'alledu.xyz': 52,
+        'ailedu.xyz': 53,
+        'hllo.cn': 54,
+        'seeok.cn': 55,
+        'setupyes.com': 60,
+        'taxyesai.com': 61,
+        'taxyes.cn': 62,
+        'uptoyes.com': 63,
+        'tidyyes.com': 64,
+        'sheng.sale': 65,
+        'dcdy.life': 66,
+        'tocads.com': 67,
+        'fitjobai.com': 68,
+        'idles.cn': 69,
+        'myall.link': 70,
+        'skomolr.cn': 71,
+        'ainfrai.com': 72,
+        'ainfrai.xyz': 73,
+        'xallin.cn': 74
+      };
+
+      var ADMIN_PROJECT_DESC = {
+        'sofayes.com': ['阵营超级流量母舰：短视频/长视频内容、IM 社交、商城与 AI 教育总入口', 'Super App Flagship: short/long video feed, IM social, mall & AI education'],
+        'music.sofayes.com': ['沙发耶音乐 SofaMusic 主站：无损曲库、听歌识曲与 iOS/桌面端直连', 'SofaMusic Primary: lossless catalog, audio recognition & native app hub'],
+        'cloud-music.sofayes.com': ['沙发耶音乐云端节点：全网云端曲库同步与 iOS 客户端在线安装分发', 'SofaMusic Cloud Node: global catalog sync & iOS app OTA distribution'],
+        'sofacut.sofayes.com': ['沙发剪 SofaCut（临时域名）：AI 智能视频剪辑工坊与多轨时间轴编辑器', 'SofaCut (Temp Domain): AI video editor & multitrack WebCodecs studio'],
+        'dezi.life': ['嘚滋本地生活与智慧餐饮：自助火锅官网、供应链与门店 Dezi OS', 'DEZI Local-Life & Smart Dining: hotpot flagship, supply chain & Dezi OS'],
+        'shinemight.com': ['ShineMight 集团控股总门户、全矩阵统一入口与电子音乐创意厂牌', 'ShineMight Holding Portal: matrix hub & electronic music label'],
+        'hmm.sale': ['跨境电商综合商场：生态严选好物、XPayes 结算与包税集运履约', 'Cross-Border Mall: house brands, XPayes checkout & DDP fulfillment'],
+        'novelyes.com': ['AI 小说出海、短剧脚本创作与多语种故事生成引擎', 'AI Fiction & Short-Drama Script Studio for global publishing'],
+        'marrychat.com': ['真实严谨的精品单身交友社区（血型/星座/性格匹配）', 'Curated Singles Community with verified authentic profiles'],
+        'ieternal.life': ['数字记忆典藏、本人授权 AI 声音与人格记忆保存平台', 'Consent-verified Digital Memory & Voice Archiving Studio'],
+        'xmyall.com': ['创作者全网多平台社交链接与个人数字名片聚合页', 'Unified Link-in-Bio Hub & Digital Card for creators'],
+        'xpayes.com': ['全球支付与多币种钱包网关、商户收单及四流合一清算入口', 'Global Payment & Multi-Currency Wallet Gateway (sandbox testing)'],
+        'usdfirm.com': ['USDF 稳定币协议、多签财资储备与链上透明度公示（物理隔离）', 'USDF Stablecoin Protocol & Reserve Transparency Portal (isolated)'],
+        'itisdeal.com': ['独立加密货币与衍生品撮合交易所及跟单系统（物理隔离）', 'Isolated Crypto Spot/Derivatives Exchange & Copy-Trading Engine'],
+        'itiscoin.com': ['底层财资清算、生息资产中心与生态权益治理通证（非交易所）', 'Treasury Settlement, Yield Hub & Ecosystem Governance Token'],
+        'asdcoin.com': ['ItisCoin 官方备用域名与财资治理镜像节点', 'Official Backup Domain for ItisCoin Treasury & Governance'],
+        'fitjob.ai': ['AI 招聘筛选、跨店实训背调网络与全球 EOR 灵活用工平台', 'AI Recruiting, Vetting & Global EOR Workforce Platform'],
+        'aiads.chat': ['对话式 AI 广告投放助手、创意生成与前置合规审查平台', 'Conversational AI Ad-Campaign & Compliance Copilot'],
+        'idles.site': ['分布式闲置 GPU 算力调度、租售与按需计费集群网络', 'Distributed Idle GPU Compute Marketplace & Rental Cluster'],
+        'lookplum.com': ['望梅品牌古法酸梅汤与东方草本饮品独立站', 'LookPlum Herbal Beverage & Plum Drink Brand Storefront'],
+        'trelry.com': ['自有商标消费品牌：极简现代服装、首饰与美妆护肤独立站', 'Trelry House Brand: apparel, jewelry & skincare storefront'],
+        'skomolr.com': ['自有商标美妆护肤品牌独立站（国际主站）', 'Skomolr Independent Beauty & Botanical Skincare Storefront'],
+        'persntrny.com': ['佩袭妮/铂妮自有女装服饰商标官网', 'Persntrny Contemporary Womenswear Brand Storefront'],
+        'decdics.com': ['嘚滋餐饮管理与风味研发早期域名（业务主入口已归口 dezi.life）', 'DECDICS Legacy Culinary Domain (consolidated under dezi.life)'],
+        'xallin.xyz': ['All in AI 战略聚合入口与前沿 AI 效率工具实验矩阵', 'XAllIn AI Strategy Hub & Experimental Productivity Lab'],
+        'xteacher.xyz': ['AI 虚拟私教与个性化自适应学习伴侣实验站', 'XTeacher AI Private Tutor & Adaptive Learning Companion'],
+        'alledu.xyz': ['沉浸式双语互动学习与语言精读训练平台', 'AllEdu Interactive Bilingual Reading & Language Studio'],
+        'ailedu.xyz': ['AI 互动课堂与自适应语言学习练习空间', 'AilEdu AI-Assisted Classroom & Language Practice Space'],
+        'hllo.cn': ['轻量化多媒体与视频实用工具实验短域名', 'Hllo Lightweight Media Utility Experimental Node'],
+        'seeok.cn': ['早期注册备用短域名与极简互联网工具实验站', 'SeeOK Legacy Reserve Domain & Minimalist Web Utility'],
+        'setupyes.com': ['注册易：全球公司极速注册、海外秘书地址、牌照与税号基建（储备）', 'SetupYes: Global Company Formation & Secretary Infra (Reserved)'],
+        'taxyesai.com': ['税易 AI：全球节税路由引擎、转移定价与跨境合规规划（储备）', 'TaxYes AI: Global Tax Routing & Cross-Border Compliance (Reserved)'],
+        'taxyes.cn': ['税易国内版：1039 无票合规与国内税收园区核定匹配（储备）', 'TaxYes China: 1039 & Domestic Tax Park Compliance (Reserved)'],
+        'uptoyes.com': ['达易/速易：智能跨境集运、包税清关与末端物流履约网络（储备）', 'UptoYes: Smart Cross-Border Logistics & DDP Customs (Reserved)'],
+        'tidyyes.com': ['TidyYes：现代企业办公流程与数字化档案整理工具（储备）', 'TidyYes: Modern Office Workflow & Archive Organizer (Reserved)'],
+        'sheng.sale': ['省手 SHENGSALE：数字权益、C2M 跨境特卖与供应链集采（储备）', 'ShengSale: Digital Perks & C2M Wholesale Platform (Reserved)'],
+        'dcdy.life': ['肚肠得意·生鲜火锅品牌官网（隶属嘚滋餐饮，储备）', 'DCDY Fresh Hotpot Brand Portal (Dezi Group, Reserved)'],
+        'tocads.com': ['TocAds：AI 广告创意工作室与投流域名（储备）', 'TocAds: Creative Ad Studio Reserve Domain'],
+        'fitjobai.com': ['FitJob 备用主域与国际人才对接镜像站（储备）', 'FitJobAI Mirror Domain for FitJob Recruiting (Reserved)'],
+        'idles.cn': ['Idles 国内 GPU 算力调度与开发者社区备用域（储备）', 'Idles China Reserve Domain for GPU Compute Cluster'],
+        'myall.link': ['MyAll 极简创作者链接聚合名片备用短域名（储备）', 'MyAll Reserve Short Domain for XMyAll Link-in-Bio'],
+        'skomolr.cn': ['Skomolr 护肤品牌中国区官网备用域名（储备）', 'Skomolr China Storefront Reserve Domain'],
+        'ainfrai.com': ['AI 底层基础设施（AI Infra）战略储备主域名', 'AInfra AI Infrastructure Reserve Domain (.com)'],
+        'ainfrai.xyz': ['AI 底层基础设施（AI Infra）技术实验储备节点', 'AInfra AI Infrastructure Lab Reserve Node (.xyz)'],
+        'xallin.cn': ['All in AI 战略中国区聚合备用节点（储备）', 'XAllIn China Reserve Domain (.cn)']
+      };
+
+      function esc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function getProjectDesc(r) {
+        var pair = ADMIN_PROJECT_DESC[r.domain];
+        if (pair) return zh ? pair[0] : pair[1];
+        return zh ? (r.tagline_zh || r.tagline_en || '') : (r.tagline_en || r.tagline_zh || '');
+      }
+
       function api(payload) {
         return fetch('/__stealth_api', {
           method: 'POST',
@@ -1325,7 +1518,7 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
         document.getElementById('klMaint').textContent = zh ? '对外锁闭 (维护/品牌)' : 'Locked (Maint/Brand)';
         document.getElementById('klAb').textContent = zh ? 'A/B/C 赛马灰度中' : 'A/B/C & Canary';
         document.getElementById('klLive').textContent = zh ? '正式全量开放' : 'Public Live';
-        document.getElementById('qInput').placeholder = zh ? '搜索域名、项目名或业务群...' : 'Search domain or project...';
+        document.getElementById('qInput').placeholder = zh ? '搜索域名、项目描述、品牌或业务群...' : 'Search domain, description, or BU...';
         document.getElementById('newPassBtn').textContent = zh ? '+ 签发体验码' : '+ Issue Pass';
 
         document.getElementById('lblAbToggle').textContent = zh ? '闭门测试态启用自动 A/B/C 分桶' : 'Enable Auto A/B/C Bucketing in Test';
@@ -1372,16 +1565,23 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
         document.getElementById('kvAb').textContent = rows.filter(function(r) { return r.mode === 'ab_live' || r.mode === 'canary' || r.ab_enabled; }).length;
         document.getElementById('kvLive').textContent = rows.filter(function(r) { return r.mode === 'live'; }).length;
 
+        var isMasterConsole = !focusDom || focusDom === 'shinemight.com';
         var list = rows.slice().sort(function(a, b) {
-          if (focusDom && a.domain === focusDom) return -1;
-          if (focusDom && b.domain === focusDom) return 1;
+          if (!isMasterConsole) {
+            if (a.domain === focusDom) return -1;
+            if (b.domain === focusDom) return 1;
+          }
+          var pa = DOMAIN_PRIORITY[a.domain] != null ? DOMAIN_PRIORITY[a.domain] : (a.is_mounted ? 80 : 90);
+          var pb = DOMAIN_PRIORITY[b.domain] != null ? DOMAIN_PRIORITY[b.domain] : (b.is_mounted ? 80 : 90);
+          if (pa !== pb) return pa - pb;
           if (a.is_mounted !== b.is_mounted) return a.is_mounted ? -1 : 1;
           return a.domain.localeCompare(b.domain);
         }).filter(function(r) {
           if (curBu === 'CURRENT' && r.domain !== focusDom) return false;
           if (curBu !== 'ALL' && curBu !== 'CURRENT' && r.bu_code !== curBu) return false;
           if (q) {
-            var hay = (r.domain + ' ' + (r.brand_name_zh || '') + ' ' + (r.brand_name_en || '') + ' ' + (r.bu_code || '')).toLowerCase();
+            var dText = getProjectDesc(r);
+            var hay = (r.domain + ' ' + dText + ' ' + (r.tagline_zh || '') + ' ' + (r.tagline_en || '') + ' ' + (r.brand_name_zh || '') + ' ' + (r.brand_name_en || '') + ' ' + (r.bu_code || '')).toLowerCase();
             if (hay.indexOf(q) === -1) return false;
           }
           return true;
@@ -1401,9 +1601,13 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
         list.forEach(function(r) {
           var card = document.createElement('div');
           var isFoc = focusDom && r.domain === focusDom;
-          card.className = 'card' + (isFoc ? ' focus-dom' : '');
+          card.className = 'card' + (isFoc && !isMasterConsole ? ' focus-dom' : '');
           var vars = Array.isArray(r.variants) ? r.variants : [];
           var wSummary = vars.map(function(v) { return v.key.toUpperCase() + ':' + v.weight + '%'; }).join(' / ');
+          var descText = getProjectDesc(r);
+          var tagLabel = isFoc
+            ? (isMasterConsole ? (zh ? '主控域' : 'Master') : (zh ? '当前主域' : 'Current'))
+            : (r.is_mounted ? (zh ? '已挂载' : 'Mounted') : (zh ? '储备' : 'Reserved'));
 
           var mHtml = modeDefs.map(function(m) {
             var act = r.mode === m.k ? (' act-' + m.k) : '';
@@ -1412,8 +1616,12 @@ function renderAdminConsoleHtml(isZh, focusDomain) {
 
           card.innerHTML =
             '<div class="c-head">' +
-              '<div><div class="dom">' + r.domain + '</div><div class="brand">' + (zh ? r.brand_name_zh : r.brand_name_en) + ' · ' + r.bu_code + ' · ' + wSummary + '</div></div>' +
-              '<span class="tag' + (isFoc ? ' focus' : '') + '">' + (isFoc ? (zh ? '当前主域' : 'Current') : (r.is_mounted ? (zh ? '已挂载' : 'Mounted') : (zh ? '储备' : 'Reserved'))) + '</span>' +
+              '<div class="c-head-main">' +
+                '<div class="dom">' + esc(r.domain) + '</div>' +
+                '<div class="desc">' + esc(descText) + '</div>' +
+                '<div class="brand">' + esc((zh ? r.brand_name_zh : r.brand_name_en) + ' · ' + r.bu_code + ' · ' + wSummary) + '</div>' +
+              '</div>' +
+              '<span class="tag' + (isFoc ? ' focus' : '') + '">' + esc(tagLabel) + '</span>' +
             '</div>' +
             '<div class="modes">' + mHtml + '</div>' +
             '<div class="test-links">' +
@@ -1835,11 +2043,25 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
   const hostLower = String(rawHost || '').toLowerCase().trim().split(':')[0];
   const domain = normalizeHost(rawHost);
   const pathname = url.pathname;
+  const uaPre = request.headers.get('user-agent') || '';
 
   // 0. Fast unforgeable internal hop bypass (prevents re-entry during HTML injection fetch)
   const internalTok = request.headers.get('x-sm-internal-pass');
   if (internalTok && (await verifyInternalPassToken(domain, internalTok))) {
     return passThroughFn();
+  }
+
+  // Strictly block search engines & AI crawlers from /test*, /__stealth_api, and admin host even if site is live
+  if (
+    (pathname === '/test' ||
+      pathname.startsWith('/test/') ||
+      pathname === '/__stealth_api' ||
+      pathname === '/__sm_test_api' ||
+      pathname === '/__sm_ab_event' ||
+      hostLower === 'admin.shinemight.com') &&
+    STRICT_CRAWLER_UA_RE.test(uaPre)
+  ) {
+    return buildCrawlerBlockedResponse();
   }
 
   const cookies = parseCookies(request.headers.get('cookie') || '');
@@ -2020,9 +2242,9 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
           { status: 200, headers: securityHeaders('text/plain; charset=utf-8', true) }
         );
       }
-      return new Response('User-agent: *\nDisallow: /\n', {
+      return new Response(STRICT_ROBOTS_TXT, {
         status: 200,
-        headers: securityHeaders('text/plain; charset=utf-8'),
+        headers: securityHeaders('text/plain; charset=utf-8', false),
       });
     }
     if (pathname === '/sitemap.xml' && isBrandMode) {
@@ -2036,8 +2258,11 @@ async function handleStandardStealthRequest(request, passThroughFn, masterAdminA
     if (pathname === '/sitemap.xml' || pathname.endsWith('.xml')) {
       return new Response('Not Found', {
         status: 404,
-        headers: securityHeaders('text/plain; charset=utf-8'),
+        headers: securityHeaders('text/plain; charset=utf-8', false),
       });
+    }
+    if (!isBrandMode && STRICT_CRAWLER_UA_RE.test(uaPre)) {
+      return buildCrawlerBlockedResponse();
     }
     if (pathname === '/manifest.webmanifest' || pathname === '/manifest.json') {
       const bName = gate.brand_name_zh || gate.domain;
