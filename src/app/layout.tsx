@@ -1,9 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import { UsdfirmLocaleProvider } from '@/lib/usdfirm/i18n';
 import { SofaYesSplash } from '@/components/ui/SofaYesSplash';
+import { MatrixNativeShell } from '@/components/MatrixNativeShell';
 import { UI_PREF_BOOTSTRAP_SCRIPT } from '@/lib/uiPreferences';
 import './globals.css';
 
+import Script from "next/script";
 const SITE_TITLE =
   'USDFirm (usdfirm.com) | 美元稳定币底层发行协议与储备金透明度公示';
 const SITE_DESC =
@@ -51,20 +53,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="zh-CN" className="dark">
+    <html lang="zh-CN" className="dark" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{ __html: UI_PREF_BOOTSTRAP_SCRIPT }}
         />
       </head>
       <body className="bg-[#111215] text-[#F4F4F6] antialiased selection:bg-[#00DC6D]/25 selection:text-white">
+        <Script id="shinemight-matrix-theme" src="/matrix-theme.js" data-default-palette="dark" strategy="beforeInteractive" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
         />
         <UsdfirmLocaleProvider>
-          <SofaYesSplash appLabel="USDFirm · USDF Protocol" />
-          {children}
+          <MatrixNativeShell>
+            <SofaYesSplash appLabel="USDFirm · USDF Protocol" />
+            {children}
+          </MatrixNativeShell>
         </UsdfirmLocaleProvider>
       </body>
     </html>

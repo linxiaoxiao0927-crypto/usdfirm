@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "theme:build": "node scripts/theme/build-adaptive-theme.mjs",
+    "theme:check": "node scripts/theme/build-adaptive-theme.mjs --check",
+    "prebuild": "node scripts/theme/build-adaptive-theme.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+@import "./theme-adaptive.generated.css";
 :root {
   color-scheme: dark;
   --sofa-ui-scale: 1;
