@@ -7,6 +7,7 @@ import {
   Coins,
   Globe,
   Layers,
+  QrCode,
   RefreshCw,
   SlidersHorizontal,
 } from 'lucide-react';
@@ -105,11 +106,122 @@ export function ClearingConsoleClient({
   const [mainTab, setMainTab] = useState<UsdfMainTab>(() =>
     mapModuleToMainTab(initialTab)
   );
+  const [passUserLabel, setPassUserLabel] = useState<string | null>(null);
+  const [passHint, setPassHint] = useState<string | null>(null);
   const [uiPrefs, setUiPrefs] = useState<UiPrefsState>(DEFAULT_UI_PREFS);
   const [viewState, setViewState] = useState<'SUCCESS' | 'LOADING' | 'ERROR'>(
     'SUCCESS'
   );
   const [errorCode, setErrorCode] = useState<string>('');
+
+  useEffect(() => {
+    const syncPass = () => {
+      const rt = (
+        window as unknown as {
+          ShineMightAuth?: {
+            getSession?: (pid?: string) => {
+              accessToken?: string;
+              idToken?: string;
+              profile?: { displayName?: string; handle?: string; unionId?: string };
+              unionId?: string;
+            } | null;
+            onAuthChange?: (
+              fn: (s: {
+                accessToken?: string;
+                idToken?: string;
+                profile?: { displayName?: string; handle?: string; unionId?: string };
+                unionId?: string;
+              } | null) => void
+            ) => () => void;
+          };
+        }
+      ).ShineMightAuth;
+      if (!rt) return null;
+      const readLabel = (
+        s: {
+          accessToken?: string;
+          idToken?: string;
+          profile?: { displayName?: string; handle?: string; unionId?: string };
+          unionId?: string;
+        } | null
+      ) => {
+        if (!s || !s.accessToken || !s.idToken || !s.profile) return null;
+        return (
+          s.profile.displayName ||
+          s.profile.handle ||
+          s.profile.unionId ||
+          s.unionId ||
+          null
+        );
+      };
+      setPassUserLabel(readLabel(rt.getSession?.('usdfirm') ?? null));
+      return rt.onAuthChange?.((next) => setPassUserLabel(readLabel(next))) ?? null;
+    };
+    let unsub = syncPass();
+    let timer: number | null = null;
+    if (!unsub && typeof window !== 'undefined') {
+      let tries = 0;
+      timer = window.setInterval(() => {
+        tries += 1;
+        unsub = syncPass();
+        if (unsub || tries >= 20) {
+          if (timer !== null) window.clearInterval(timer);
+          timer = null;
+        }
+      }, 250);
+    }
+    return () => {
+      if (timer !== null) window.clearInterval(timer);
+      if (unsub) unsub();
+    };
+  }, []);
+
+  const handleOpenUsdfirmQrAuth = useCallback(() => {
+    setPassHint(null);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale === 'en' ? 'en' : 'zh-CN';
+    }
+    const rt = (
+      window as unknown as {
+        ShineMightAuth?: {
+          openQrLogin?: (opts: Record<string, unknown>) => void;
+        };
+      }
+    ).ShineMightAuth;
+    if (!rt || typeof rt.openQrLogin !== 'function') {
+      setPassHint(
+        locale === 'en'
+          ? 'SofaYes Pass QR runtime is not ready yet. Please refresh and retry.'
+          : '沙发通行证扫码安全模块尚未就绪，请刷新页面后重试。'
+      );
+      return;
+    }
+    rt.openQrLogin({
+      projectId: 'usdfirm',
+      appName: 'USDFirm',
+      appNameEn: 'USDFirm',
+      domain: 'usdfirm.com',
+      firewallZone: 'FIREWALL_ZONE_B_STABLECOIN_MINT',
+      locale,
+      onSuccess: (session: {
+        accessToken?: string;
+        idToken?: string;
+        profile?: { displayName?: string; handle?: string; unionId?: string };
+        unionId?: string;
+      }) => {
+        if (session && session.accessToken && session.idToken && session.profile) {
+          setPassUserLabel(
+            session.profile.displayName ||
+              session.profile.handle ||
+              session.profile.unionId ||
+              session.unionId ||
+              null
+          );
+          setPassHint(null);
+        }
+      },
+    });
+  }, [locale]);
 
   useEffect(() => {
     const initial = readUiPrefs();
@@ -240,6 +352,18 @@ export function ClearingConsoleClient({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
+              onClick={handleOpenUsdfirmQrAuth}
+              aria-label={locale === 'zh' ? '沙发 App 扫码安全登录' : 'Sign in with SofaYes App QR'}
+              className="h-10 px-3 sm:px-3.5 rounded-full bg-[#303034] hover:bg-[#3A3A3F] border border-white/[0.08] flex items-center justify-center gap-1.5 text-xs font-semibold text-[#F5F5F7] whitespace-nowrap shrink-0 active:scale-95 transition"
+            >
+              <QrCode className="w-3.5 h-3.5 text-[#4DA3FF] shrink-0" />
+              <span className="hidden sm:inline max-w-[112px] truncate">
+                {passUserLabel || (locale === 'zh' ? '沙发扫码' : 'Sign In')}
+              </span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => void syncLedger()}
               aria-label={c.syncLedger}
               className="w-10 h-10 rounded-full bg-[#1C1D21] hover:bg-[#24262C] flex items-center justify-center text-white active:scale-95 transition"
@@ -271,6 +395,16 @@ export function ClearingConsoleClient({
             </button>
           </div>
         </div>
+        {passHint && (
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 pb-2">
+            <div className="rounded-xl bg-rose-500/15 border border-rose-500/25 px-3 py-1.5 text-xs text-rose-200 flex items-center justify-between gap-2">
+              <span>{passHint}</span>
+              <span className="font-mono text-[10px] text-rose-300/80 whitespace-nowrap shrink-0">
+                ERR_AUTH_RUNTIME_UNAVAILABLE
+              </span>
+            </div>
+          </div>
+        )}
       </header>
 
       <div className="relative z-10 flex-1 mx-auto max-w-7xl w-full px-4 sm:px-6 lg:px-8 pt-3 pb-28 space-y-5">

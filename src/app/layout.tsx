@@ -60,6 +60,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#111215] text-[#F4F4F6] antialiased selection:bg-[#00DC6D]/25 selection:text-white">
+        <Script id="shinemight-matrix-auth" src="/matrix-qr-auth.js" data-project-id="usdfirm" data-app-name="USDFirm" data-app-name-en="USDFirm" data-domain="usdfirm.com" data-firewall-zone="FIREWALL_ZONE_B_STABLECOIN_MINT" data-auth-origin="https://auth.shinemight.com" strategy="afterInteractive" />
         <Script id="shinemight-matrix-theme" src="/matrix-theme.js" data-default-palette="dark" strategy="beforeInteractive" />
         <script
           type="application/ld+json"
